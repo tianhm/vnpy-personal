@@ -268,53 +268,17 @@ class AlligatoragainStrategy(CtaTemplate):
 
         self.zui[0:self.bufferSize-1] = self.zui[1:self.bufferSize]
         self.zui[-1] = zui_value
-        ############################################
-        #鳄鱼线持仓信号
 
-        self.eyu[0:self.bufferSize-1] = self.eyu[0:self.bufferSize]
-
+        
+        
         cond = 0
+
         if self.zui[-2] == 1 and self.closeArray[-2] > self.openArray[-2] and self.lowArray[-2] > lips[-2] and self.openArray[-1] > lips[-1]:
             cond = 1
-        if self.eyu[-2] == 1 and bar.low < lips[-1]:
-            cond = 0
-
-
         if self.zui[-2] == -1 and self.closeArray[-2] < self.openArray[-2] and self.highArray[-2] < lips[-2] and self.openArray[-1] < lips[-1]:
             cond = -1
-        if self.eyu[-2] == -1 and bar.high > lips[-1]:
-            cond = 0
 
-        self.eyu[-1] = cond
-        ###################################
-        
-
-        #print bar.datetime, self.lips_N[-1] , self.teeth_N[-1] , self.croco_N[-1] ,lips[-1] , teeth[-1]  , self.zui[-1] , croco[-1] , cond
-        #print bar.datetime , cond
-
-        ###################################
-        #开仓 涨跌线
-        if self.eyu[-2] == 0 and self.eyu[-1] == 1:
-            self.kai_up = bar.open  + self.N_up * self.MinMove * self.PriceScale
-
-        if self.eyu[-2] == 0 and self.eyu[-1] == -1:
-            self.kai_down = bar.open - self.N_down * self.MinMove * self.PriceScale
-
-
-        ####################################
-        #进场 
-        #开多仓 
-        if self.eyu[-1] == 0 and bar.high > self.kai_up and self.pos < 1:
-            #平空单
-            if self.pos < 0:
-                vtOrderID = self.cover(bar.open , abs(self.pos))
-                self.orderList.append(vtOrderID)
-            if bar.open > self.kai_up :
-                vtOrderID = self.buy(bar.open , self.lots)
-                self.zhisun_l = bar.open * ( 1 - self.zhisunlv_l / 1000.0)
-            else:
-                vtOrderID = self.buy(bar.open , self.lots)
-        ####################################
+        print bar.datetime, self.lips_N[-1] , self.teeth_N[-1] , self.croco_N[-1] ,lips[-1] , teeth[-1]  , self.zui[-1] , croco[-1] , cond
 
         if cond > 0:
             if self.pos == 0:

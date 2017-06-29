@@ -134,6 +134,7 @@ class BacktestingEngine(object):
             dataClass = VtTickData
             func = self.newTick
 
+        print self.dataStartDate , self.strategyStartDate
         # 载入初始化需要用的数据
         flt = {'datetime':{'$gte':self.dataStartDate,
                            '$lt':self.strategyStartDate}}        
@@ -466,7 +467,12 @@ class BacktestingEngine(object):
     def output(self, content):
         """输出内容"""
         print str(datetime.now()) + "\t" + content 
-    
+    #----------------------------------------------------------------------
+    #   输出内容到日志 
+    def printOutToFile(self, resultList , filename):
+        for result in resultList:
+            ss = "entryDT:" + str(result.entryDt) + "  exitDt: " + str(result.exitDt) + "  entryPrice:" + str(result.entryPrice) +"   exitPrice:" + str(result.exitPrice)
+            print ss + "\n"
     #----------------------------------------------------------------------
     def calculateBacktestingResult(self):
         """
@@ -597,6 +603,8 @@ class BacktestingEngine(object):
         totalWinning = 0        # 总盈利金额		
         totalLosing = 0         # 总亏损金额        
         
+        self.printOutToFile(resultList , "test.csv")
+
         for result in resultList:
             capital += result.pnl
             maxCapital = max(capital, maxCapital)
