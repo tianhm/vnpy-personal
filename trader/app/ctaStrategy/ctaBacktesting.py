@@ -31,7 +31,11 @@ class BacktestingEngine(object):
     TICK_MODE = 'tick'
     BAR_MODE = 'bar'
 
+    debugFigure = True
+    hasVolume = False
     final_result = []
+    qutoesList = []    # quotes的数组
+    volumeList = []
 
     #----------------------------------------------------------------------
     def __init__(self):
@@ -88,6 +92,8 @@ class BacktestingEngine(object):
         self.tick = None
         self.bar = None
         self.dt = None      # 最新的时间
+
+        
         
     #----------------------------------------------------------------------
     def setStartDate(self, startDate='20100416', initDays=10):
@@ -200,7 +206,15 @@ class BacktestingEngine(object):
         self.crossLimitOrder()      # 先撮合限价单
         self.crossStopOrder()       # 再撮合停止单
         self.strategy.onBar(bar)    # 推送K线到策略中
-    
+
+        # add data
+        if self.debugFigure == True:
+            from matplotlib.dates import date2num
+            self.qutoesList.append( (bar.datetime , bar.open ,bar.high,bar.low,bar.close))
+            #self.qutoesList.append( (date2num(bar.datetime) , bar.open ,bar.high,bar.low,bar.close))
+            if self.hasVolume == True:
+                self.volumeList.append( (bar.datetime , bar.volume ))
+                #self.volumeList.append( (date2num(bar.datetime) , bar.volume ))
     #----------------------------------------------------------------------
     def newTick(self, tick):
         """新的Tick"""
@@ -665,7 +679,7 @@ class BacktestingEngine(object):
         d['tradeTimeList'] = tradeTimeList
         
         return d
-        
+    
     #----------------------------------------------------------------------
     def showBacktestingResult(self):
         """显示回测结果"""
@@ -690,8 +704,12 @@ class BacktestingEngine(object):
         self.output(u'盈亏比：\t%s' %formatNumber(d['profitLossRatio']))
     
         # 绘图
-        import matplotlib.pyplot as plt        
         import numpy as np
+        import matplotlib.pyplot as plt  
+        import matplotlib
+        import matplotlib.dates as mdates
+        import pylab
+
         
         try:
             import seaborn as sns       # 如果安装了seaborn则设置为白色风格
@@ -705,37 +723,81 @@ class BacktestingEngine(object):
         # self.entryDt = entryDt          # 开仓时间datetime    
         # self.exitDt = exitDt            # 平仓时间
         # self.volume                     # 交易的方向 
-        for result in self.final_result:
-            if result.volume > 0:
-                plt.plot( [result.entryDt,result.exitDt] , [result.entryPrice , result.exitPrice] , color = 'r')
-            if result.volume < 0:
-                plt.plot( [result.entryDt,result.exitDt] , [result.entryPrice , result.exitPrice] , color = 'b')
-        plt.figure(2)
-        pCapital = plt.subplot(4, 1, 1)
-        pCapital.set_ylabel("capital")
-        pCapital.plot(d['capitalList'], color='r', lw=0.8)
         
-        pDD = plt.subplot(4, 1, 2)
-        pDD.set_ylabel("DD")
-        pDD.bar(range(len(d['drawdownList'])), d['drawdownList'], color='g')
-        
-        pPnl = plt.subplot(4, 1, 3)
-        pPnl.set_ylabel("pnl")
-        pPnl.hist(d['pnlList'], bins=50, color='c')
 
-        pPos = plt.subplot(4, 1, 4)
-        pPos.set_ylabel("Position")
-        if d['posList'][-1] == 0:
-            del d['posList'][-1]
-        tradeTimeIndex = [item.strftime("%m/%d %H:%M:%S") for item in d['tradeTimeList']]
-        xindex = np.arange(0, len(tradeTimeIndex), np.int(len(tradeTimeIndex)/10))
-        tradeTimeIndex = map(lambda i: tradeTimeIndex[i], xindex)
-        pPos.plot(d['posList'], color='k', drawstyle='steps-pre')
-        pPos.set_ylim(-1.2, 1.2)
-        plt.sca(pPos)
-        plt.tight_layout()
-        plt.xticks(xindex, tradeTimeIndex, rotation=30)  # 旋转15
-        
+        if self.debugFigure == True:
+            dic_pair = {}
+            dates = [x[0] for x in self.qutoesList]
+            l_dates = len(dates)
+            n_lists = range(l_dates)
+            new_quotes = []
+            for i in n_lists:
+                dic_pair[dates[i]] = i
+                new_quotes.append( (i, self.qutoesList[i][1], self.qutoesList[i][2], self.qutoesList[i][3] , self.qutoesList[i][4]))
+            #print dates
+            ax1 = plt.subplot2grid((4,4),(0,0),rowspan=3, colspan=4)
+            #matplotlib.finance.candlestick_ohlc(ax1,self.qutoesList,colorup = "#77d879",colordown='#db3f3f')
+            matplotlib.finance.candlestick_ohlc(ax1,new_quotes,colorup = "#77d879",colordown='#db3f3f')
+
+            if self.hasVolume == True:
+                ax2 = plt.subplot2grid((4,4),(3,0),rowspan=1,colspan=4)
+                ax2.bar( n_lists , np.array(self.volumeList) , width=0.4 , align='center')
+                #ax2.bar( dates , np.array(self.volumeList) , width=0.4 , align='center')
+                #ax2.xaxis.set_major_locator(mdates.MonthLocator())
+                #ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+                for label in ax2.xaxis.get_ticklabels():
+                    label.set_rotation(60)
+            plt.grid = True
+            ax1.set_title("Trade Figure")
+            ax1.set_ylabel("Price")
+            # ax2.set_ylabel("Volume")
+
+            if self.hasVolume == True:
+                plt.setp(ax1.get_xticklabels() , visible = False)
+            plt.setp(ax1.yaxis.get_ticklabels()[0] , visible = False)
+            plt.subplots_adjust(bottom=0.2,top=0.9,hspace=0)
+
+            for result in self.final_result:
+                if result.volume > 0:
+                    plt.plot( [ dic_pair[ result.entryDt],dic_pair[result.exitDt]] , [result.entryPrice , result.exitPrice] , color = 'r')
+                    #plt.plot( [result.entryDt,result.exitDt] , [result.entryPrice , result.exitPrice] , color = 'r')
+                if result.volume < 0:
+                    plt.plot( [ dic_pair[result.entryDt],dic_pair[result.exitDt]] , [result.entryPrice , result.exitPrice] , color = 'b')
+                    #plt.plot( [result.entryDt,result.exitDt] , [result.entryPrice , result.exitPrice] , color = 'b')
+            xindex = np.arange(0, l_dates, np.int(l_dates / 10))
+            tradeTimeIndex = map(lambda i: dates[i].strftime("%m/%d %H:%M:%S"), xindex)
+            plt.xticks(xindex, tradeTimeIndex, rotation=15)  # 旋转15
+        try:
+            plt.figure(2)
+            pCapital = plt.subplot(4, 1, 1)
+            pCapital.set_ylabel("capital")
+            pCapital.plot(d['capitalList'], color='r', lw=0.8)
+            
+            pDD = plt.subplot(4, 1, 2)
+            pDD.set_ylabel("DD")
+            pDD.bar(range(len(d['drawdownList'])), d['drawdownList'], color='g')
+            
+            pPnl = plt.subplot(4, 1, 3)
+            pPnl.set_ylabel("pnl")
+            pPnl.hist(d['pnlList'], bins=50, color='c')
+
+            pPos = plt.subplot(4, 1, 4)
+            pPos.set_ylabel("Position")
+            if d['posList'][-1] == 0:
+                del d['posList'][-1]
+            tradeTimeIndex = [item.strftime("%m/%d %H:%M:%S") for item in d['tradeTimeList']]
+            #print tradeTimeIndex
+            xindex = np.arange(0, len(tradeTimeIndex), np.int(len(tradeTimeIndex)/10))
+            #print xindex
+            tradeTimeIndex = map(lambda i: tradeTimeIndex[i], xindex)
+            #print tradeTimeIndex
+            pPos.plot(d['posList'], color='k', drawstyle='steps-pre')
+            pPos.set_ylim(-1.2, 1.2)
+            plt.sca(pPos)
+            plt.tight_layout()
+            plt.xticks(xindex, tradeTimeIndex, rotation=15)  # 旋转15
+        except Exception,ex:
+            print ex
         plt.show()
     
     #----------------------------------------------------------------------
@@ -989,8 +1051,8 @@ if __name__ == '__main__':
     engine.setBacktestingMode(engine.BAR_MODE)
 
     # 设置回测用的数据起始日期
-    engine.setStartDate('20130601')
     #engine.setStartDate('20170101')
+    engine.setStartDate('20170601')
 
     
     # 载入历史数据到引擎中
@@ -1006,7 +1068,7 @@ if __name__ == '__main__':
     #engine.initStrategy(LivermoreStrategy, {"param1":4 , "param2":2})
     #engine.initStrategy(AlligatorStrategy, {})
 
-    engine.initStrategy(LivermoreStrategy, {})
+    engine.initStrategy(LivermoreStrategy, {"param1":0.2 , "param2":0.2})
     #engine.initStrategy(AlligatoragainStrategy, {})
     
     # 开始跑回测
