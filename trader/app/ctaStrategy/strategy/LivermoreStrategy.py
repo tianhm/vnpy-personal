@@ -24,11 +24,13 @@ from vnpy.trader.app.ctaStrategy.ctaHistoryData import *
 import talib
 import numpy as np
 
+import talib
+import numpy as np
+
 from vnpy.trader.vtObject import VtBarData
 from vnpy.trader.vtConstant import EMPTY_STRING
 from vnpy.trader.app.ctaStrategy.ctaTemplate import CtaTemplate
 
-from vnpy.trader.app import riskManager, ctaStrategy
 from vnpy.trader.app.ctaStrategy.ctaBacktesting import *
 from PyQt4 import QtCore, QtGui
 
@@ -63,6 +65,8 @@ class LivermoreStrategy(CtaTemplate):
     param1 = 6                  # 每次变化 param1% 画K线的数
     param2 = 3                  # 突破 param2% 多少确定趋势
 
+    zhangDiePoint = 10          # 涨跌多少点开多开空
+
     # 策略变量
     bar = None                  # 1分钟K线对象
     barMinute = EMPTY_STRING    # K线当前的分钟
@@ -75,8 +79,8 @@ class LivermoreStrategy(CtaTemplate):
 
     buyOrderID = None                   # OCO委托买入开仓的委托号
     shortOrderID = None                 # OCO委托卖出开仓的委托号
-    orderList = []                      # 保存委托代码的列表
-
+    limitOrderList = []                 # 保存限价委托代码的列表
+    stopOrderList = []                  # 保存停止委托单代码的列表
 
     #highArray = np.zeros(bufferSize)     # K线最高价的数组
     #lowArray = np.zeros(bufferSize)      # K线最低价的数组
@@ -95,6 +99,14 @@ class LivermoreStrategy(CtaTemplate):
     number_cjhc   = []                    # 次级回撤
 
     QuJianPairs   = []                    # 区间对
+
+    big_condArray = [0]                   # 大方向状态
+
+    conditionChangeType = 0               # 状态变更的原因 
+    # 突破上升趋势最大点 --> 1
+    # W形上升趋势--> 2
+    # 突破下降趋势最低点 --> 3
+    # 倒W形下降趋势 --> 4
 
     ori_data      = [(0,0)]* bufferSize   # 原始的数据  [(datetime , close_price)]
     #cp_data       = []                   # 用来对照 对照的代码
@@ -118,6 +130,12 @@ class LivermoreStrategy(CtaTemplate):
         """Constructor"""
         super(LivermoreStrategy, self).__init__(ctaEngine, setting)
 
+        for key in setting.keys():
+            if key == "param1":
+                self.param1 = setting[key]
+            if key == "param2":
+                self.param2 = setting[key]
+        #print setting
     #----------------------------------------------------------------------
     def onInit(self):
         """初始化策略（必须由用户继承实现）"""
@@ -128,6 +146,7 @@ class LivermoreStrategy(CtaTemplate):
         for bar in initData:
             self.onBar(bar)
 
+        print self.param1 , self.param2
         self.keyPointArr   = [] # 存储最重要的几个关键点，  (点位,时间, 线的颜色)的格式
         self.KLinePointArr = [] # [(datetime,Y,"上升趋势",'r')] 存储剩下的趋势点, 上升趋势黑墨水 k--black，下降趋势红墨水 ， 其他栏的点，铅笔
         self.number_ssqs   = [] # 上升趋势
@@ -138,8 +157,6 @@ class LivermoreStrategy(CtaTemplate):
         self.number_cjhc   = [] # 次级回撤
 
         self.putEvent()
-
-        print self.param1 , self.param2
 
     #----------------------------------------------------------------------
     def onStart(self):
@@ -190,7 +207,7 @@ class LivermoreStrategy(CtaTemplate):
     def onBar(self, bar):
         """收到Bar推送（必须由用户继承实现）"""
         # 如果当前是一个5分钟走完
-        if bar.datetime.minute % 5 == 0:
+        if bar.datetime.minute % 60 == 0:
             # 如果已经有聚合5分钟K线
             if self.fiveBar:
                 # 将最新分钟的数据更新到目前5分钟线中
@@ -257,11 +274,21 @@ class LivermoreStrategy(CtaTemplate):
     def judge_xjqs(self , big_condition ,  y , param2):
         if len(self.number_xjqs) > 0:
             if y < self.number_xjqs[-1][1]:
+                self.conditionChangeType = 3
                 big_condition = XiaJiangQushi
+        to_drop_line = 0
         if len(self.number_zrhc) > 0:
             for i in range(1 , len(self.number_zrhc) + 1):
-                if self.number_zrhc[-i][2] == RED_LINE and y < self.number_zrhc[-i][1] * ( 1 - param2 / 100.0):
-                    big_condition = XiaJiangQushi
+                if self.number_zrhc[-i][2] == RED_LINE :
+                    if y < self.number_zrhc[-i][1] * ( 1 - param2 / 100.0):
+                        self.conditionChangeType = 4
+                        big_condition = XiaJiangQushi
+                        to_drop_line = 1
+                    break
+        if 1 == to_drop_line:
+            for i in range(1 , len(self.number_zrhc) + 1):
+                if self.number_zrhc[-i][2] == RED_LINE:
+                    self.number_zrhc[-i] = ( self.number_zrhc[-i][0] , self.number_zrhc[-i][1], NoBelowLine)
         return big_condition
     '''
     判断上升趋势
@@ -269,12 +296,23 @@ class LivermoreStrategy(CtaTemplate):
     def judge_ssqs(self , big_condition ,  y , param2):
         if len(self.number_ssqs) > 0:
             if y > self.number_ssqs[-1][1]:
-                print "judge ssqs:" + str(y) + "  " + str(self.number_ssqs[-1][0]) + "  " + str(self.number_ssqs[-1][1]) + "  " + str(self.number_ssqs[-1][2]) 
+                #print "judge ssqs:" + str(y) + "  " + str(self.number_ssqs[-1][0]) + "  " + str(self.number_ssqs[-1][1]) + "  " + str(self.number_ssqs[-1][2]) 
+                self.conditionChangeType = 1
                 big_condition = ShangShenQuShi
+        to_drop_line = 0
         if len(self.number_zrhs) > 0:
             for i in range(1 , len(self.number_zrhs) + 1):
-                if self.number_zrhs[-i][2] == BLACK_LINE and y > self.number_zrhs[-i][1] * ( 1 + param2 / 100.0):
-                    big_condition = ShangShenQuShi
+                if self.number_zrhs[-i][2] == BLACK_LINE :
+                    if y > self.number_zrhs[-i][1] * ( 1 + param2 / 100.0):
+                        self.conditionChangeType = 2
+                        big_condition = ShangShenQuShi
+                        to_drop_line = 1
+                    break
+        if 1 == to_drop_line:
+            for i in range(1 , len(self.number_zrhs) + 1):
+                if self.number_zrhs[-i][2] == BLACK_LINE:
+                    self.number_zrhs[-i] = (self.number_zrhs[-i][0] , self.number_zrhs[-i][1] , NoBelowLine) 
+                    #self.number_zrhs[-i][2] = NoBelowLine
         return big_condition
 
     # livermore 策略 核心判断函数
@@ -306,18 +344,18 @@ class LivermoreStrategy(CtaTemplate):
                 self.keyPointArr.append( (pl_x , pl_y , BLACK_LINE))
                 self.number_zrhs[-1] = (self.number_zrhs[-1][0] , self.number_zrhs[-1][1] , BLACK_LINE)
                 #开启下一个状态
+                # 自然回升转自然回撤
                 self.big_condition = ZiRanHuiChe
                 self.start_point = (x,y)
-                # 自然回升转自然回撤
-                # 自然回升转下降趋势
-                # 当前点小于下降趋势的最后一个点 或 小于带红线的自然回撤最后一个点
-                self.big_condition = self.judge_xjqs(self.big_condition , y , self.param2)
                 # 自然回升转次级回撤
                 # 当前价格 > 自然回撤的最后一个价格时，为次级回撤
                 if len(self.number_zrhc) > 0 and y > self.number_zrhc[-1][1]:
                     self.big_condition = CiJiHuiChe
                 if len(self.number_zrhc) == 0:
                     self.big_condition = ZiRanHuiChe
+                # 自然回升转下降趋势
+                # 当前点小于下降趋势的最后一个点 或 小于带红线的自然回撤最后一个点
+                self.big_condition = self.judge_xjqs(self.big_condition , y , self.param2)
                 self.addToNumberFigure(x, y , self.big_condition)
         elif self.big_condition == CiJiHuiShen:
             if y > pl_y:
@@ -374,7 +412,7 @@ class LivermoreStrategy(CtaTemplate):
                 # 判断是否是次级回升
                 if len(self.number_zrhs) > 0 and y < self.number_zrhs[-1][1]:
                     self.big_condition = CiJiHuiShen
-                    print self.number_zrhs
+                    #print self.number_zrhs
                 if len(self.number_zrhs) == 0:
                     self.big_condition = ZiRanHuiShen
                     # 判断是否是上升趋势 , 
@@ -410,9 +448,11 @@ class LivermoreStrategy(CtaTemplate):
     def onFiveBar(self, bar):
         """收到5分钟K线"""
         # 撤销之前发出的尚未成交的委托（包括限价单和停止单）
-        for orderID in self.orderList:
+        for orderID in self.limitOrderList:
             self.cancelOrder(orderID)
-        self.orderList = []
+        # for orderID in self.orderList:
+        #     self.cancelOrder(orderID)
+        # self.orderList = []
 
         #print bar.close , bar.datetime
         # 保存K线数据
@@ -446,6 +486,7 @@ class LivermoreStrategy(CtaTemplate):
         self.number_zrhc   = self.number_zrhc[-100:]     # 自然回撤
         self.number_cjhc   = self.number_cjhc[-100:]     # 次级回撤
 
+        self.big_condArray = self.big_condArray[-100:] # 高级状态
         if len(self.KLinePointArr) == 0:
             ## 说明数据要初始化
             self.big_condition = ShangShenQuShi
@@ -463,41 +504,84 @@ class LivermoreStrategy(CtaTemplate):
 
         
         self.judge(self.KLinePointArr[-1] , self.ori_data[-1])
+
+        self.big_condArray.append(self.big_condition)
+
         # 判断是否要进行交易
 
         buy_cond  = 0
         sell_cond = 0
 
+
+        # 表示状态出现改变
+        # Version 2.0 ,  出现上升趋势，下10跳的停止单
+
+        # 状态变更，止损，平仓等等
+        if self.pos < 0 and self.big_condition != XiaJiangQushi:
+            orderID = self.cover(bar.close + 5 , abs(self.pos) )
+            self.limitOrderList.append(orderID)
+
+        if self.pos > 0 and self.big_condition != ShangShenQuShi:
+            orderID = self.sell(bar.close - 5 , abs(self.pos) )
+            self.limitOrderList.append(orderID)
+        
+        if self.big_condArray[-1] != self.big_condArray[-2] :
+            for orderID in self.stopOrderList:
+                self.cancelOrder(orderID)        
+
+            if self.pos < 1 :
+                if self.big_condition == ShangShenQuShi and self.conditionChangeType == 1:
+                    orderID = self.buy(bar.close + self.zhangDiePoint ,  self.fixedSize , stop = True)
+                    self.stopOrderList.append(orderID)
+
+                if self.big_condition == ShangShenQuShi and self.conditionChangeType == 2:
+                    # 这样设置， 让它一定能以第二天开盘价发单
+                    orderID = self.buy(bar.close + 5 , self.fixedSize )
+                    self.limitOrderList.append(orderID)
+
+            if self.pos > -1:
+                if self.big_condition == XiaJiangQushi and self.conditionChangeType == 3:
+                    orderID = self.short(bar.close - self.zhangDiePoint , self.fixedSize , stop = True)
+                    self.stopOrderList.append(orderID)
+
+                if self.big_condition == XiaJiangQushi and self.conditionChangeType == 4:
+                    orderID = self.short(bar.close - 5 , self.fixedSize )
+                    self.limitOrderList.append(orderID)
+
         #print buy_cond , sell_cond
 
-        if self.big_condition == ShangShenQuShi:
-            buy_cond = 1
-        if self.big_condition == XiaJiangQushi:
-            sell_cond = 1
+       
 
-        if self.pos == 0:
-            if buy_cond  == 1:
-                orderID = self.buy(  bar.close , self.fixedSize )
-                self.orderList.append(orderID)
-            if sell_cond == 1:
-                orderID = self.short( bar.close , self.fixedSize)
-                self.orderList.append(orderID)
+        # Version 1.0   出现信号直接开多开空
+        #  
+        # if self.big_condition == ShangShenQuShi:
+        #     buy_cond = 1
+        # if self.big_condition == XiaJiangQushi:
+        #     sell_cond = 1
 
-        if self.pos > 0:
-            if buy_cond == 0:
-                orderID = self.sell(bar.close , abs(self.pos))
-                self.orderList.append(orderID)
-            if sell_cond == 1:
-                orderID = self.short(bar.close , self.fixedSize)
-                self.orderList.append(orderID)
+        # if self.pos == 0:
+        #     if buy_cond  == 1:
+        #         orderID = self.buy(  bar.close , self.fixedSize )
+        #         self.limitOrderList.append(orderID)
+        #     if sell_cond == 1:
+        #         orderID = self.short( bar.close , self.fixedSize)
+        #         self.limitOrderList.append(orderID)
 
-        if self.pos < 0:
-            if sell_cond == 0:
-                orderID = self.cover(bar.close , abs(self.pos))
-                self.orderList.append(orderID)
-            if buy_cond == 1:
-                orderID = self.buy(bar.close , self.fixedSize)
-                self.orderList.append(orderID)
+        # if self.pos > 0:
+        #     if buy_cond == 0:
+        #         orderID = self.sell(bar.close , abs(self.pos))
+        #         self.limitOrderList.append(orderID)
+        #     if sell_cond == 1:
+        #         orderID = self.short(bar.close , self.fixedSize)
+        #         self.limitOrderList.append(orderID)
+
+        # if self.pos < 0:
+        #     if sell_cond == 0:
+        #         orderID = self.cover(bar.close , abs(self.pos))
+        #         self.limitOrderList.append(orderID)
+        #     if buy_cond == 1:
+        #         orderID = self.buy(bar.close , self.fixedSize)
+        #         self.limitOrderList.append(orderID)
             
 
 
@@ -536,20 +620,20 @@ class LivermoreStrategy(CtaTemplate):
     #----------------------------------------------------------------------
     def onTrade(self, trade):
         # 多头开仓成交后，撤消空头委托
-        if self.pos > 0:
-            self.cancelOrder(self.shortOrderID)
-            if self.buyOrderID in self.orderList:
-                self.orderList.remove(self.buyOrderID)
-            if self.shortOrderID in self.orderList:
-                self.orderList.remove(self.shortOrderID)
-        # 反之同样
-        elif self.pos < 0:
-            self.cancelOrder(self.buyOrderID)
-            if self.buyOrderID in self.orderList:
-                self.orderList.remove(self.buyOrderID)
-            if self.shortOrderID in self.orderList:
-                self.orderList.remove(self.shortOrderID)
-        
+        # if self.pos > 0:
+        #     self.cancelOrder(self.shortOrderID)
+        #     if self.buyOrderID in self.orderList:
+        #         self.orderList.remove(self.buyOrderID)
+        #     if self.shortOrderID in self.orderList:
+        #         self.orderList.remove(self.shortOrderID)
+        # # 反之同样
+        # elif self.pos < 0:
+        #     self.cancelOrder(self.buyOrderID)
+        #     if self.buyOrderID in self.orderList:
+        #         self.orderList.remove(self.buyOrderID)
+        #     if self.shortOrderID in self.orderList:
+        #         self.orderList.remove(self.shortOrderID)
+        # print trade
         # 发出状态更新事件
         self.putEvent()
         

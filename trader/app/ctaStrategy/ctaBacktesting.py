@@ -31,6 +31,8 @@ class BacktestingEngine(object):
     TICK_MODE = 'tick'
     BAR_MODE = 'bar'
 
+    final_result = []
+
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
@@ -642,6 +644,7 @@ class BacktestingEngine(object):
             profitLossRatio = -averageWinning/averageLosing # 盈亏比
 
         # 返回回测结果
+        self.final_result = resultList
         d = {}
         d['capital'] = capital
         d['maxCapital'] = maxCapital
@@ -695,7 +698,19 @@ class BacktestingEngine(object):
             sns.set_style('whitegrid')  
         except ImportError:
             pass
-
+        plt.figure(1)
+        # self.entryPrice = entryPrice    # 开仓价格
+        # self.exitPrice = exitPrice      # 平仓价格
+        
+        # self.entryDt = entryDt          # 开仓时间datetime    
+        # self.exitDt = exitDt            # 平仓时间
+        # self.volume                     # 交易的方向 
+        for result in self.final_result:
+            if result.volume > 0:
+                plt.plot( [result.entryDt,result.exitDt] , [result.entryPrice , result.exitPrice] , color = 'r')
+            if result.volume < 0:
+                plt.plot( [result.entryDt,result.exitDt] , [result.entryPrice , result.exitPrice] , color = 'b')
+        plt.figure(2)
         pCapital = plt.subplot(4, 1, 1)
         pCapital.set_ylabel("capital")
         pCapital.plot(d['capitalList'], color='r', lw=0.8)
@@ -990,7 +1005,9 @@ if __name__ == '__main__':
     #engine.initStrategy(EmaDemoStrategy, {})
     #engine.initStrategy(LivermoreStrategy, {"param1":4 , "param2":2})
     #engine.initStrategy(AlligatorStrategy, {})
-    engine.initStrategy(AlligatoragainStrategy, {})
+
+    engine.initStrategy(LivermoreStrategy, {})
+    #engine.initStrategy(AlligatoragainStrategy, {})
     
     # 开始跑回测
     engine.runBacktesting()
