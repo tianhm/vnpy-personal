@@ -436,7 +436,6 @@ class CtaEngine(object):
         """启动策略"""
         if name in self.strategyDict:
             strategy = self.strategyDict[name]
-            
             if strategy.inited and not strategy.trading:
                 strategy.trading = True
                 self.callStrategyFunc(strategy, strategy.onStart)
@@ -470,7 +469,6 @@ class CtaEngine(object):
         """保存策略配置"""
         with open(self.settingFileName, 'w') as f:
             l = []
-            
             for strategy in self.strategyDict.values():
                 setting = {}
                 for param in strategy.paramList:

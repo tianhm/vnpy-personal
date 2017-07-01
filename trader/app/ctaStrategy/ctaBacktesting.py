@@ -751,7 +751,6 @@ class BacktestingEngine(object):
             ax1.set_title("Trade Figure")
             ax1.set_ylabel("Price")
             # ax2.set_ylabel("Volume")
-
             if self.hasVolume == True:
                 plt.setp(ax1.get_xticklabels() , visible = False)
             plt.setp(ax1.yaxis.get_ticklabels()[0] , visible = False)
@@ -917,8 +916,6 @@ class BacktestingEngine(object):
         newPrice = round(price/self.priceTick, 0) * self.priceTick
         return newPrice
     
-        
-
 ########################################################################
 class TradingResult(object):
     """每笔交易的结果"""
@@ -940,8 +937,6 @@ class TradingResult(object):
         self.slippage = slippage*2*size*abs(volume)                         # 滑点成本
         self.pnl = ((self.exitPrice - self.entryPrice) * volume * size 
                     - self.commission - self.slippage)                      # 净盈亏
-
-
 
 ########################################################################
 class OptimizationSetting(object):
@@ -1039,7 +1034,8 @@ if __name__ == '__main__':
     # 建议使用ipython notebook或者spyder来做回测
     # 同样可以在命令模式下进行回测（一行一行输入运行）
     from strategy.strategyEmaDemo import *
-    from strategy.LivermoreStrategy import *
+    #from strategy.LivermoreStrategy import *
+    from strategy.LivermoreStrategy2 import *
     from strategy.Alligator import *
     from strategy.strategyAligatorAgain import *
     #from strategy.strategyAligatorAgain____back import *
@@ -1052,8 +1048,8 @@ if __name__ == '__main__':
 
     # 设置回测用的数据起始日期
     #engine.setStartDate('20170101')
-    engine.setStartDate('20170601')
-
+    engine.setStartDate('20161201')
+    engine.setEndDate('20161231')
     
     # 载入历史数据到引擎中
     engine.setDatabase(MINUTE_DB_NAME, 'rb888')
@@ -1068,7 +1064,7 @@ if __name__ == '__main__':
     #engine.initStrategy(LivermoreStrategy, {"param1":4 , "param2":2})
     #engine.initStrategy(AlligatorStrategy, {})
 
-    engine.initStrategy(LivermoreStrategy, {"param1":0.2 , "param2":0.2})
+    engine.initStrategy(LivermoreStrategy2, {"param1":6 , "param2":3})
     #engine.initStrategy(AlligatoragainStrategy, {})
     
     # 开始跑回测
