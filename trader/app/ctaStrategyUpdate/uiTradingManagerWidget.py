@@ -70,7 +70,9 @@ def loadSetting(filename = 'CTA_setting.json'):
 		l = json.load(f)
         
         print l
-        #for setting in l:
+        print l[0]["params"]
+        for setting in l:
+        	print setting
         #	loadStrategy(setting)
 
 if __name__ == '__main__':

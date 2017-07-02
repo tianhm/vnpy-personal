@@ -29,3 +29,5 @@
 {'param2': 18, 'param1': 18}_capital_557956.899
 {'param2': 20, 'param1': 18}_capital_603930.612
 {'param2': 10, 'param1': 20}_capital_670957.527
+{'param2': 12, 'param1': 20}_capital_607715.826
+{'param2': 14, 'param1': 20}_capital_673871.397
