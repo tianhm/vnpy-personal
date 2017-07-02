@@ -52,18 +52,25 @@ BLACK_LINE     = "b"        # 下降趋势以及自然回升形成的点下标�
 
 '''
 livermore 策略
+
+# 原本是顺势操作。。 
+# 如今在自然回撤、自然回升上添加操作。
 '''
 ##################################################################
 
-class LivermoreStrategy2(CtaTemplate):
+class LivermoreStrategy3(CtaTemplate):
     """基于livermore策略的交易策略"""
 
-    className = 'LivermoreStrategy2'
+    className = 'LivermoreStrategy3'
     author = u'ipqhjjybj'
 
     # 策略参数
     param1 = 6                  # 每次变化 param1 画K线的数
     param2 = 3                  # 突破 param2 多少确定趋势
+    param3 = 50                 # 回升上一个区间的百分之多少时，开始下单     38.2 , 50 , 61.8 , 100
+
+    short_wg_enter = 0          # 是否采取网格开空
+    long_wg_enter = 0           # 是否采取网格开多
 
     zhangDiePoint = 10          # 涨跌多少点开多开空
 
@@ -129,7 +136,7 @@ class LivermoreStrategy2(CtaTemplate):
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
         """Constructor"""
-        super(LivermoreStrategy2, self).__init__(ctaEngine, setting)
+        super(LivermoreStrategy3, self).__init__(ctaEngine, setting)
 
         for key in setting.keys():
             if key == "param1":
@@ -498,19 +505,57 @@ class LivermoreStrategy2(CtaTemplate):
 
         self.big_condArray.append(self.big_condition)
 
+        #判断上一个趋势是下降趋势 ， 还是上升趋势。。
+        judge_pre_big_condition = 0
+        for i in range(1,len(self.big_condArray)):
+            if self.big_condArray[-i] in [ShangShenQuShi , XiaJiangQushi]:
+                if self.big_condArray[-i] == ShangShenQuShi:
+                    judge_pre_big_condition = 1
+                else:
+                    judge_pre_big_condition = -1
+
+        
+
+
         # 判断是否要进行交易
 
         buy_cond  = 0
         sell_cond = 0
 
+        if self.big_condArray[-2] == ShangShenQuShi and self.big_condition == ZiRanHuiChe:
+            (p1,p2,cc_dition)= self.QuJianPairs[-1]
+            abs_y = abs(p1[1] - p2[1])
+            ys1 = self.start_point[1]
+            if bar.close < p2[1] - abs_y * self.param3 / 100.0:
+                self.long_wg_enter = 1
+        
+        if self.big_condArray[-2] == XiaJiangQushi and self.big_condition == ZiRanHuiShen:
+            (p1,p2,cc_dition)= self.QuJianPairs[-1]
+            abs_y = abs(p1[1] - p2[1])
+            ys1 = self.start_point[1]
+            if bar.close > p2[1] + abs_y * self.param3 / 100.0:
+                self.short_wg_enter = 1
+
+        if self.big_condition in [XiaJiangQushi,ShangShenQuShi]:
+            self.long_wg_enter = 0
+            self.short_wg_enter = 0
+
+
 
         # 表示状态出现改变
         # Version 1.0 ,
-        if self.big_condition == ShangShenQuShi:
+        # if self.big_condition == ShangShenQuShi or (self.long_wg_enter == 1):
+        #     buy_cond = 1
+        # if self.big_condition == XiaJiangQushi or (self.short_wg_enter == 1): 
+        #     sell_cond = 1
+
+        if self.long_wg_enter == 1:
             buy_cond = 1
-        if self.big_condition == XiaJiangQushi:
+        if self.short_wg_enter == 1: 
             sell_cond = 1
 
+        #if self.long_wg_enter == 1:
+        #    print self.big_condition
         if self.pos == 0:
             if buy_cond  == 1:
                 orderID = self.buy(  bar.close , self.fixedSize )
@@ -607,7 +652,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(LivermoreStrategy2, d)
+    engine.initStrategy(LivermoreStrategy3, d)
     
     # 开始跑回测
     engine.runBacktesting()

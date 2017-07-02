@@ -484,6 +484,7 @@ class CtaEngine(object):
         with open(self.settingFileName) as f:
             l = json.load(f)
             
+            print l
             for setting in l:
                 self.loadStrategy(setting)
                 
@@ -647,6 +648,3 @@ class PositionBuffer(object):
         
         
     
-    
-
-

@@ -275,14 +275,3 @@ class CtaEngineManager(QtWidgets.QWidget):
             self.ctaEngine.savePosition()
             
         event.accept()
-        
-        
-    
-    
-    
-    
-
-
-
-    
-    

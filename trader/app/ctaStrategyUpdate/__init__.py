@@ -3,8 +3,8 @@
 from ctaEngine import CtaEngine
 from uiCtaWidget import CtaEngineManager
 
-appName = 'CtaStrategy'
-appDisplayName = u'CTA策略'
+appName = 'CtaStrategyUpdate'
+appDisplayName = u'vnpy更新版'
 appEngine = CtaEngine
 appWidget = CtaEngineManager
 appIco = 'cta.ico'

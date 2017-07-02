@@ -321,26 +321,26 @@ class AlligatoragainStrategy(CtaTemplate):
         ### 下面的估计要研究下怎么写
         if cond > 0:
             if self.pos == 0:
-                print bar.datetime , "buy" , bar.open
+                #print bar.datetime , "buy" , bar.open
                 vtOrderID = self.buy(bar.open , self.lots)
                 self.orderList.append(vtOrderID)
             elif self.pos < 0:
-                print bar.datetime , "cover" , bar.open
+                #print bar.datetime , "cover" , bar.open
                 vtOrderID = self.cover(bar.open , abs(self.pos))
                 self.orderList.append(vtOrderID)
-                print bar.datetime , "buy" , bar.open
+                #print bar.datetime , "buy" , bar.open
                 vtOrderID = self.buy(bar.open , self.lots)
                 self.orderList.append(vtOrderID)
         elif cond < 0:
             if self.pos == 0:
-                print bar.datetime , "short" , bar.open
+                #print bar.datetime , "short" , bar.open
                 vtOrderID = self.short(bar.open , self.lots)
                 self.orderList.append(vtOrderID)
             elif self.pos > 0:
-                print bar.datetime , "sell" , bar.open
+                #print bar.datetime , "sell" , bar.open
                 vtOrderID = self.sell(bar.open , abs(self.pos))
                 self.orderList.append(vtOrderID)
-                print bar.datetime , "short" , bar.open
+                #print bar.datetime , "short" , bar.open
                 vtOrderID = self.short(bar.open , self.lots)
                 self.orderList.append(vtOrderID)
 

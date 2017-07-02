@@ -1,19 +1,12 @@
 [
     {
-        "name": "double ema",
-        "className": "EmaDemoStrategy",
-        "vtSymbol": "rb1712"
-    },
-
-    {
-        "name": "atr rsi",
-        "className": "AtrRsiStrategy",
-        "vtSymbol": "rb1711"
-    },
-
-    {
-        "name": "king keltner",
-        "className": "KkStrategy",
-        "vtSymbol": "rb1710"
+        "name": "LivermoreStrategy2",
+        "className": "Lib",
+        "vtSymbol": "rb1710",
+        "params":{
+          "param1":"14",
+          "param2":"10"
+        }
     }
+
 ]

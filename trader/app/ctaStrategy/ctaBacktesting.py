@@ -33,6 +33,12 @@ class BacktestingEngine(object):
 
     debugFigure = True
     hasVolume = False
+
+    ###
+    # databaseData是数据库的数据
+    # 将数据保存到内存里，来进行加速操作
+    flag_has_in_db = False  # 数据是否已经加载进入内存
+    databaseData = []  # 
     final_result = []
     qutoesList = []    # quotes的数组
     volumeList = []
@@ -168,8 +174,10 @@ class BacktestingEngine(object):
     #----------------------------------------------------------------------
     def runBacktesting(self):
         """运行回测"""
-        # 载入历史数据
-        self.loadHistoryData()
+
+        if self.flag_has_in_db == False:
+            # 载入历史数据
+            self.loadHistoryData()
         
         # 首先根据回测模式，确认要使用的数据类
         if self.mode == self.BAR_MODE:
@@ -191,12 +199,19 @@ class BacktestingEngine(object):
         
         self.output(u'开始回放数据')
 
-        for d in self.dbCursor:
-            data = dataClass()
-            data.__dict__ = d
-            func(data)     
-            
+        if self.flag_has_in_db == False:
+            for d in self.dbCursor:
+                data = dataClass()
+                data.__dict__ = d
+                func(data)    
+                self.databaseData.append(d)
+        else:
+            for d in self.databaseData:
+                data = dataClass()
+                data.__dict__ = d
+                func(data)
         self.output(u'数据回放结束')
+        self.flag_has_in_db = True
         
     #----------------------------------------------------------------------
     def newBar(self, bar):
@@ -681,8 +696,9 @@ class BacktestingEngine(object):
         return d
     
     #----------------------------------------------------------------------
-    def showBacktestingResult(self):
+    def showBacktestingResult(self , whetherDebug = False):
         """显示回测结果"""
+        self.debugFigure = whetherDebug
         d = self.calculateBacktestingResult()
         
         # 输出
@@ -835,6 +851,8 @@ class BacktestingEngine(object):
         if not settingList or not targetName:
             self.output(u'优化设置有问题，请检查')
         
+        fileName = strategyClass.className + "_optimize"  + ".txt"
+        f = open(fileName , "wb")
         # 遍历优化
         resultList = []
         for setting in settingList:
@@ -851,8 +869,12 @@ class BacktestingEngine(object):
 
             print setting 
             print targetValue
+            sstr = str(setting) + "_" + str(targetName) + "_"+str(targetValue)
+            f.write(sstr + "\n")
+            f.flush()
             resultList.append(([str(setting)], targetValue))
         
+        f.close()
         # 显示结果
         resultList.sort(reverse=True, key=lambda result:result[1])
         self.output('-' * 30)
@@ -1040,6 +1062,7 @@ if __name__ == '__main__':
     from strategy.strategyEmaDemo import *
     #from strategy.LivermoreStrategy import *
     from strategy.LivermoreStrategy2 import *
+    from strategy.LivermoreStrategy3 import *
     from strategy.Alligator import *
     from strategy.strategyAligatorAgain import *
     #from strategy.strategyAligatorAgain____back import *
@@ -1051,9 +1074,9 @@ if __name__ == '__main__':
     engine.setBacktestingMode(engine.BAR_MODE)
 
     # 设置回测用的数据起始日期
-    #engine.setStartDate('20170101')
-    engine.setStartDate('20161201')
-    engine.setEndDate('20161231')
+    #engine.setStartDate('20110101')
+    engine.setStartDate('20130101')
+    #engine.setEndDate('20140201')
     
     # 载入历史数据到引擎中
     engine.setDatabase(MINUTE_DB_NAME, 'rb888')
@@ -1061,14 +1084,16 @@ if __name__ == '__main__':
     # 设置产品相关参数
     engine.setSlippage(0.2)     # 股指1跳
     engine.setRate(0.3/10000)   # 万0.3
-    engine.setSize(10)          # 股指合约大小  ,     一跳
+    engine.setSize(300)          # 股指合约大小  ,     一跳
     
     # 在引擎中创建策略对象
     #engine.initStrategy(EmaDemoStrategy, {})
     #engine.initStrategy(LivermoreStrategy, {"param1":4 , "param2":2})
     #engine.initStrategy(AlligatorStrategy, {})
 
-    engine.initStrategy(LivermoreStrategy2, {"param1":6 , "param2":3})
+    engine.initStrategy(LivermoreStrategy2, {"param1":14 , "param2":10})
+    #engine.initStrategy(LivermoreStrategy3, {"param1":14 , "param2":10})
+    
     #engine.initStrategy(AlligatoragainStrategy, {})
     
     # 开始跑回测
@@ -1077,6 +1102,6 @@ if __name__ == '__main__':
     # 显示回测结果
     # spyder或者ipython notebook中运行时，会弹出盈亏曲线图
     # 直接在cmd中回测则只会打印一些回测数值
-    engine.showBacktestingResult()
+    engine.showBacktestingResult(whetherDebug = False)
     
     
