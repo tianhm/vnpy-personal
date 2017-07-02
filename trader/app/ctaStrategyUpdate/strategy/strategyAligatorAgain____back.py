@@ -56,16 +56,9 @@ class AlligatoragainStrategy(CtaTemplate):
     kai_up = 0                  # 
     kai_down = 0                
 
-    #持仓品种最小单位
-    MinMove = 1                 # 最小移动单位
-    PriceScale = 1              # 最小跳动单位
-
     # 止损参数
     zhisunlv_l = 10             # 止损参数
     zhisunlv_s = 10             # 
-
-    high_since_entry =  0       # 移动最高点
-    low_since_entry = 0         # 移动最低点
 
     # 策略变量
     bar = None                  # 1分钟K线对象
@@ -86,8 +79,6 @@ class AlligatoragainStrategy(CtaTemplate):
     lips_N = np.zeros(bufferSize)       # 记录bufferSize
     teeth_N = np.zeros(bufferSize)      
     croco_N = np.zeros(bufferSize)
-
-    eyu = np.zeros(bufferSize)          # 鳄鱼线持仓
     
 
     buyOrderID = None                   # OCO委托买入开仓的委托号
@@ -277,48 +268,18 @@ class AlligatoragainStrategy(CtaTemplate):
 
         self.zui[0:self.bufferSize-1] = self.zui[1:self.bufferSize]
         self.zui[-1] = zui_value
-        ############################################
-        #鳄鱼线持仓信号
-        ## 下面是MC的写法
-        # self.eyu[0:self.bufferSize-1] = self.eyu[1:self.bufferSize]
 
-        # cond = 0
-        # if self.zui[-1] == 1 and bar.close > bar.open and bar.low > lips[-1] :
-        #     cond = 1
-        # if self.eyu[-2] == 1 and bar.low < lips[-1]:
-        #     cond = 0
-
-        # if self.zui[-1] == -1 and bar.close < bar.open and bar.high > lips[-1]:
-        #     cond = -1
-        # if self.eyu[-2] == -1 and bar.high > lips[-1]:
-        #     cond = 0
-
-        # self.eyu[-1] = cond
-
-        ############################################
-        ## 下面是TB的语法，感觉MC的更接近于vnpy
-
-        self.eyu[0:self.bufferSize-1] = self.eyu[1:self.bufferSize]
+        
+        
         cond = 0
+
         if self.zui[-2] == 1 and self.closeArray[-2] > self.openArray[-2] and self.lowArray[-2] > lips[-2] and self.openArray[-1] > lips[-1]:
             cond = 1
-        if self.eyu[-2] == 1 and bar.low < lips[-1]:
-            cond = 0
-
-
         if self.zui[-2] == -1 and self.closeArray[-2] < self.openArray[-2] and self.highArray[-2] < lips[-2] and self.openArray[-1] < lips[-1]:
             cond = -1
-        if self.eyu[-2] == -1 and bar.high > lips[-1]:
-            cond = 0
 
-        self.eyu[-1] = cond
-        ###################################
-        #print bar.datetime, self.lips_N[-1] , self.teeth_N[-1] , self.croco_N[-1] ,lips[-1] , teeth[-1]  , self.zui[-1] , croco[-1] , cond
-        #print bar.datetime , cond
-######################################################################################################
+        print bar.datetime, self.lips_N[-1] , self.teeth_N[-1] , self.croco_N[-1] ,lips[-1] , teeth[-1]  , self.zui[-1] , croco[-1] , cond
 
-        #########
-        ### 下面的估计要研究下怎么写
         if cond > 0:
             if self.pos == 0:
                 print bar.datetime , "buy" , bar.open
@@ -343,63 +304,6 @@ class AlligatoragainStrategy(CtaTemplate):
                 print bar.datetime , "short" , bar.open
                 vtOrderID = self.short(bar.open , self.lots)
                 self.orderList.append(vtOrderID)
-
-        ###################################
-        # #开仓 涨跌线
-        # if self.eyu[-2] == 0 and self.eyu[-1] == 1:
-        #     #self.kai_up = bar.open  + self.N_up * self.MinMove * self.PriceScale
-        #     self.kai_up = bar.close + self.N_up * self.MinMove * self.PriceScale
-
-        # if self.eyu[-2] == 0 and self.eyu[-1] == -1:
-        #     #self.kai_down = bar.open - self.N_down * self.MinMove * self.PriceScale
-        #     self.kai_down = bar.close - self.N_down * self.MinMove * self.PriceScale
-
-        # ####################################
-        # #进场 
-        # #开多仓
-
-        # if self.zui[-1] > 0 and self.pos < 1 and self.eyu[-1] > 0:
-        #     if self.pos < 0:
-        #         vtOrderID = self.cover( self.kai_up , abs(self.pos) , stop = True)
-        #         self.orderList.append(vtOrderID)
-
-        #     if self.pos == 0:
-        #         self.high_since_entry = bar.high
-        #         self.low_since_entry = bar.low
-
-        #     vtOrderID = self.buy( self.kai_up , self.lots  , stop = True)
-        #     self.orderList.append(vtOrderID)
-
-        # if self.zui[-1] < 0 and self.pos > -1 and abs(self.eyu[-1]) > 0:
-        #     if self.pos > 0:
-        #         vtOrderID = self.sell( self.kai_down , abs(self.pos) , stop = True)
-        #         self.orderList.append(vtOrderID)
-
-        #     if self.pos == 0:
-        #         self.high_since_entry = bar.high
-        #         self.low_since_entry = bar.low
-            
-        #     vtOrderID = self.short(self.kai_down , abs(self.pos) , stop = True)
-        #     self.orderList.append(vtOrderID)
-
-        ####################################
-##################################################################################################################
-        # 止损线:
-        # if self.pos == 0:
-        #     self.high_since_entry = bar.high
-        #     self.low_since_entry = bar.low
-        # elif self.pos > 0:
-        #     self.high_since_entry = max(self.high_since_entry , bar.high)
-        #     self.low_since_entry = bar.low
-
-        #     orderID = self.sell(self.high_since_entry*(1-self.zhisunlv_l/1000),  abs(self.pos), True)
-        #     self.orderList.append(orderID)
-        # elif self.pos < 0:
-        #     self.high_since_entry = bar.high
-        #     self.low_since_entry = min(self.low_since_entry , bar.low)
-
-        #     orderID = self.cover(self.low_since_entry*(1+self.zhisunlv_s/100), abs(self.pos) , True)
-        #     self.orderList.append(orderID)
 
         # 判断是否要进行交易
     
@@ -500,7 +404,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(AlligatoragainStrategy, d)
+    engine.initStrategy(KkStrategy, d)
     
     # 开始跑回测
     engine.runBacktesting()
