@@ -1082,8 +1082,9 @@ if __name__ == '__main__':
     engine.setDatabase(MINUTE_DB_NAME, 'rb888')
     
     # 设置产品相关参数
-    engine.setSlippage(0.2)     # 股指1跳
-    engine.setRate(0.3/10000)   # 万0.3
+    #engine.setSlippage(0.2)     # 股指1跳
+    engine.setSlippage(1.0)      
+    engine.setRate(0.3/10000)    # 万0.3
     engine.setSize(300)          # 股指合约大小  ,     一跳
     
     # 在引擎中创建策略对象

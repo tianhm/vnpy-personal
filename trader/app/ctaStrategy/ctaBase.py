@@ -29,6 +29,11 @@ TICK_DB_NAME = 'VnTrader_Tick_Db'
 DAILY_DB_NAME = 'VnTrader_Daily_Db'
 MINUTE_DB_NAME = 'VnTrader_1Min_Db'
 
+# 数据库名称
+HOUR_DB_NAME = 'VnTrader_1Hour_Db'
+FIVE_MINUTE_DB_NAME = 'VnTrader_5Min_Db'
+THIRTY_MINUTE_DB_NAME = 'VnTrader_30Min_Db'
+
 # 引擎类型，用于区分当前策略的运行环境
 ENGINETYPE_BACKTESTING = 'backtesting'  # 回测
 ENGINETYPE_TRADING = 'trading'          # 实盘

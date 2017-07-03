@@ -115,6 +115,7 @@ class AlligatoragainStrategy(CtaTemplate):
     def __init__(self, ctaEngine, setting):
         """Constructor"""
         super(AlligatoragainStrategy, self).__init__(ctaEngine, setting)
+
         
     #----------------------------------------------------------------------
     def onInit(self):
