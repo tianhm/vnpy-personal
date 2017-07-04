@@ -6,33 +6,12 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 # vn.trader模块
-from vnpy.event import EventEngine
-from vnpy.trader.vtEngine import MainEngine
-from vnpy.trader.uiQt import qApp
-from vnpy.trader.uiMainWindow import MainWindow
-
-# 加载底层接口
-from vnpy.trader.gateway import ctpGateway
-
-# 加载上层应用
-from vnpy.trader.app import riskManager, ctaStrategy
-
-from vnpy.trader.app.ctaStrategy.ctaHistoryData import *
-
-
-
-import talib
-import numpy as np
-
-import talib
-import numpy as np
 
 from vnpy.trader.vtObject import VtBarData
 from vnpy.trader.vtConstant import EMPTY_STRING
-from vnpy.trader.app.ctaStrategy.ctaTemplate import CtaTemplate
+from vnpy.trader.app.ctaStrategyUpdate.ctaTemplate import CtaTemplate
 
-from vnpy.trader.app.ctaStrategy.ctaBacktesting import *
-from PyQt4 import QtCore, QtGui
+import numpy as np
 
 ShangShenQuShi = "上升趋势".decode('utf-8')
 ZiRanHuiShen   = "自然回升".decode('utf-8')
@@ -55,10 +34,10 @@ livermore 策略
 '''
 ##################################################################
 
-class LivermoreStrategy2(CtaTemplate):
+class LivermoreStrategy(CtaTemplate):
     """基于livermore策略的交易策略"""
 
-    className = 'LivermoreStrategy2'
+    className = 'LivermoreStrategy'
     author = u'ipqhjjybj'
 
     # 策略参数
@@ -129,14 +108,16 @@ class LivermoreStrategy2(CtaTemplate):
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
         """Constructor"""
-        super(LivermoreStrategy2, self).__init__(ctaEngine, setting)
+        super(LivermoreStrategy, self).__init__(ctaEngine, setting)
 
-        for key in setting.keys():
+        params = setting['params']
+        for key in params:
             if key == "param1":
-                self.param1 = setting[key]
+                self.param1 = params[key]
             if key == "param2":
-                self.param2 = setting[key]
+                self.param2 = params[key]
 
+        print self.param1 , self.param2
                 
         #print setting
     #----------------------------------------------------------------------
@@ -606,7 +587,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(LivermoreStrategy2, d)
+    engine.initStrategy(LivermoreStrategy, d)
     
     # 开始跑回测
     engine.runBacktesting()

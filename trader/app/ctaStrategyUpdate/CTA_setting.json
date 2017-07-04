@@ -1,12 +1,11 @@
 [
     {
-        "name": "LivermoreStrategy2",
-        "className": "Lib",
+        "name": "LivermoreStrategy",
+        "className": "LivermoreStrategy",
         "vtSymbol": "rb1710",
         "params":{
           "param1":"14",
           "param2":"10"
         }
     }
-
 ]

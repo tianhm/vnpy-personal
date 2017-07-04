@@ -31,9 +31,19 @@ from vnpy.trader.vtObject import VtTickData, VtBarData
 from vnpy.trader.vtGateway import VtSubscribeReq, VtOrderReq, VtCancelOrderReq, VtLogData
 from vnpy.trader.vtFunction import todayDate
 
-from vnpy.trader.app.ctaStrategy.ctaBase import *
-from vnpy.trader.app.ctaStrategy.strategy import STRATEGY_CLASS
+from vnpy.trader.app.ctaStrategyUpdate.ctaBase import *
+from vnpy.trader.app.ctaStrategyUpdate.strategy import STRATEGY_CLASS
 
+
+###################################
+# 持仓管理的类
+# 用于合并信号， 然后决定如何发单， 何时发单
+class CtaPositionManager(object):
+    '''
+    CTA策略 管理持有的仓位， 用于撮合信号
+    '''
+    def __init__(self , ctaEngine):
+        self.ctaEngine = ctaEngine
 
 
 
@@ -44,6 +54,7 @@ class CtaEngine(object):
     path = os.path.abspath(os.path.dirname(__file__))
     settingFileName = os.path.join(path, settingFileName)      
 
+    positionManager = None
     #----------------------------------------------------------------------
     def __init__(self, mainEngine, eventEngine):
         """Constructor"""
@@ -85,9 +96,13 @@ class CtaEngine(object):
         # 引擎类型为实盘
         self.engineType = ENGINETYPE_TRADING
         
+        # 注册仓位管理Manager 
+        self.positionManager = CtaPositionManager(self)
+
         # 注册事件监听
         self.registerEvent()
- 
+
+
     #----------------------------------------------------------------------
     def sendOrder(self, vtSymbol, orderType, price, volume, strategy):
         """发单"""
@@ -373,19 +388,19 @@ class CtaEngine(object):
     #----------------------------------------------------------------------
     def loadStrategy(self, setting):
         """载入策略"""
+        params = []
         try:
             name = setting['name']
             className = setting['className']
         except Exception, e:
             self.writeCtaLog(u'载入策略出错：%s' %e)
             return
-        
         # 获取策略类
         strategyClass = STRATEGY_CLASS.get(className, None)
         if not strategyClass:
             self.writeCtaLog(u'找不到策略类：%s' %className)
             return
-        
+
         # 防止策略重名
         if name in self.strategyDict:
             self.writeCtaLog(u'策略实例重名：%s' %name)
@@ -484,7 +499,7 @@ class CtaEngine(object):
         with open(self.settingFileName) as f:
             l = json.load(f)
             
-            #print l
+            print l
             for setting in l:
                 self.loadStrategy(setting)
                 

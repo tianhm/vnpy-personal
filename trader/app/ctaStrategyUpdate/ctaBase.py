@@ -25,6 +25,7 @@ STOPORDERPREFIX = 'CtaStopOrder.'
 SETTING_DB_NAME = 'VnTrader_Setting_Db'
 POSITION_DB_NAME = 'VnTrader_Position_Db'
 
+
 TICK_DB_NAME = 'VnTrader_Tick_Db'
 DAILY_DB_NAME = 'VnTrader_Daily_Db'
 MINUTE_DB_NAME = 'VnTrader_1Min_Db'

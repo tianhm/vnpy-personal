@@ -19,7 +19,7 @@ from vnpy.event import Event
 from vnpy.trader.vtEvent import *
 from vnpy.trader.uiBasicWidget import QtGui, QtCore, QtWidgets, BasicCell
 
-from vnpy.trader.app.ctaStrategy.language import text
+from vnpy.trader.app.ctaStrategyUpdate.language import text
 
 import json
 
@@ -34,7 +34,7 @@ from vnpy.event import Event
 from vnpy.trader.vtEvent import *
 from vnpy.trader.uiBasicWidget import QtGui, QtCore, QtWidgets, BasicCell
 
-from vnpy.trader.app.ctaStrategy.language import text
+from vnpy.trader.app.ctaStrategyUpdate.language import text
 
 
 
@@ -75,7 +75,19 @@ def loadSetting(filename = 'CTA_setting.json'):
         	print setting
         #	loadStrategy(setting)
 
+
+
 if __name__ == '__main__':
-	loadSetting(filename = "CTA_setting.json")
+	#loadSetting(filename = "CTA_setting.json")
 	#engine = ctaEngine(None , None)
     #tm = tradingManager(None , None) 
+
+     # 创建事件引擎
+    # ee = EventEngine2()
+    
+    # # 创建主引擎
+    # me = MainEngine(ee)
+
+    #engine = CtaEngine(me, ee)
+
+    print "1"
