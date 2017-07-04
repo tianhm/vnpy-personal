@@ -8,12 +8,14 @@ from __future__ import division
 
 
 from vnpy.trader.app.ctaStrategy.ctaBacktesting import BacktestingEngine, MINUTE_DB_NAME, OptimizationSetting
-
+from ctaBase import *
 
 if __name__ == '__main__':
     from vnpy.trader.app.ctaStrategy.strategy.strategyAtrRsi import AtrRsiStrategy
     #from vnpy.trader.app.ctaStrategy.strategy.strategyLivermore import LivermoreStrategy
-    from vnpy.trader.app.ctaStrategy.strategy.LivermoreStrategy2 import LivermoreStrategy2
+    #from vnpy.trader.app.ctaStrategy.strategy.LivermoreStrategy2 import LivermoreStrategy2
+    from vnpy.trader.app.ctaStrategy.strategy.LivermoreHourStrategy import LivermoreHourStrategy
+    #from vnpy.trader.app.ctaStrategy.strategy.LivermoreThirtyStrategy import LivermoreThirtyStrategy
     # 创建回测引擎
     engine = BacktestingEngine()
     
@@ -21,7 +23,8 @@ if __name__ == '__main__':
     engine.setBacktestingMode(engine.BAR_MODE)
 
     # 设置回测用的数据起始日期
-    engine.setStartDate('20140101')
+    #engine.setStartDate('20140101')
+    engine.setStartDate('20110101')
     
     # 设置产品相关参数
     engine.setSlippage(0.2)     # 股指1跳
@@ -30,7 +33,9 @@ if __name__ == '__main__':
     engine.setPriceTick(0.2)    # 股指最小价格变动
     
     # 设置使用的历史数据库
-    engine.setDatabase(MINUTE_DB_NAME, 'rb888')
+    #engine.setDatabase(MINUTE_DB_NAME, 'rb888')
+    engine.setDatabase(HOUR_DB_NAME, 'rb888')
+    #engine.setDatabase(THIRTY_MINUTE_DB_NAME, 'rb888')
     
     # 跑优化
     # setting = OptimizationSetting()                 # 新建一个优化任务设置对象
@@ -41,8 +46,8 @@ if __name__ == '__main__':
     
     setting = OptimizationSetting() 
     setting.setOptimizeTarget('capital')              # 设置优化排序的目标是策略净盈利
-    setting.addParameter('param1',  10  , 30 , 2)      # 增加第一个优化参数atrLength，起始12，结束20，步进2
-    setting.addParameter('param2',  10 , 20,  2)          
+    setting.addParameter('param1',  10  , 200 , 5)      # 增加第一个优化参数atrLength，起始12，结束20，步进2
+    setting.addParameter('param2',  10 , 120,  5)          
 
     
     #setting = OptimizationSetting()
@@ -54,7 +59,9 @@ if __name__ == '__main__':
     
     # 运行单进程优化函数，自动输出结果，耗时：359秒
     #engine.runOptimization(AtrRsiStrategy, setting)            
-    engine.runOptimization(LivermoreStrategy2, setting)
+    #engine.runOptimization(LivermoreStrategy2, setting)
+    engine.runOptimization(LivermoreHourStrategy, setting)
+    #engine.runOptimization(LivermoreThirtyStrategy, setting)
     
     # 多进程优化，耗时：89秒
     #engine.runParallelOptimization(AtrRsiStrategy, setting)
