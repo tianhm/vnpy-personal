@@ -14,8 +14,8 @@ if __name__ == '__main__':
     from vnpy.trader.app.ctaStrategy.strategy.strategyAtrRsi import AtrRsiStrategy
     #from vnpy.trader.app.ctaStrategy.strategy.strategyLivermore import LivermoreStrategy
     #from vnpy.trader.app.ctaStrategy.strategy.LivermoreStrategy2 import LivermoreStrategy2
-    from vnpy.trader.app.ctaStrategy.strategy.LivermoreHourStrategy import LivermoreHourStrategy
-    #from vnpy.trader.app.ctaStrategy.strategy.LivermoreThirtyStrategy import LivermoreThirtyStrategy
+    #from vnpy.trader.app.ctaStrategy.strategy.LivermoreHourStrategy import LivermoreHourStrategy
+    from vnpy.trader.app.ctaStrategy.strategy.LivermoreThirtyStrategy import LivermoreThirtyStrategy
     # 创建回测引擎
     engine = BacktestingEngine()
     
@@ -34,8 +34,8 @@ if __name__ == '__main__':
     
     # 设置使用的历史数据库
     #engine.setDatabase(MINUTE_DB_NAME, 'rb888')
-    engine.setDatabase(HOUR_DB_NAME, 'rb888')
-    #engine.setDatabase(THIRTY_MINUTE_DB_NAME, 'rb888')
+    #engine.setDatabase(HOUR_DB_NAME, 'rb888')
+    engine.setDatabase(THIRTY_MINUTE_DB_NAME, 'rb888')
     
     # 跑优化
     # setting = OptimizationSetting()                 # 新建一个优化任务设置对象
@@ -60,8 +60,8 @@ if __name__ == '__main__':
     # 运行单进程优化函数，自动输出结果，耗时：359秒
     #engine.runOptimization(AtrRsiStrategy, setting)            
     #engine.runOptimization(LivermoreStrategy2, setting)
-    engine.runOptimization(LivermoreHourStrategy, setting)
-    #engine.runOptimization(LivermoreThirtyStrategy, setting)
+    #engine.runOptimization(LivermoreHourStrategy, setting)
+    engine.runOptimization(LivermoreThirtyStrategy, setting)
     
     # 多进程优化，耗时：89秒
     #engine.runParallelOptimization(AtrRsiStrategy, setting)
