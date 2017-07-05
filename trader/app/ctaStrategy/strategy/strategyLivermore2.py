@@ -55,10 +55,10 @@ livermore 策略
 '''
 ##################################################################
 
-class LivermoreThirtyStrategy(CtaTemplate):
+class Livermore_2_Strategy(CtaTemplate):
     """基于livermore策略的交易策略"""
 
-    className = 'LivermoreThirtyStrategy'
+    className = 'Livermore_2_Strategy'
     author = u'ipqhjjybj'
 
     # 策略参数
@@ -129,7 +129,7 @@ class LivermoreThirtyStrategy(CtaTemplate):
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
         """Constructor"""
-        super(LivermoreThirtyStrategy, self).__init__(ctaEngine, setting)
+        super(Livermore_2_Strategy, self).__init__(ctaEngine, setting)
 
         for key in setting.keys():
             if key == "param1":
@@ -209,46 +209,45 @@ class LivermoreThirtyStrategy(CtaTemplate):
     #----------------------------------------------------------------------
     def onBar(self, bar):
         """收到Bar推送（必须由用户继承实现）"""
-        self.onFiveBar(bar)
         # 如果当前是一个5分钟走完
-        # if bar.datetime.minute % 5 == 0:
-        #     # 如果已经有聚合5分钟K线
-        #     if self.fiveBar:
-        #         # 将最新分钟的数据更新到目前5分钟线中
-        #         fiveBar = self.fiveBar
-        #         fiveBar.high = max(fiveBar.high, bar.high)
-        #         fiveBar.low = min(fiveBar.low, bar.low)
-        #         fiveBar.close = bar.close
+        if bar.datetime.minute % 5 == 0:
+            # 如果已经有聚合5分钟K线
+            if self.fiveBar:
+                # 将最新分钟的数据更新到目前5分钟线中
+                fiveBar = self.fiveBar
+                fiveBar.high = max(fiveBar.high, bar.high)
+                fiveBar.low = min(fiveBar.low, bar.low)
+                fiveBar.close = bar.close
                 
-        #         # 推送5分钟线数据
-        #         self.onFiveBar(fiveBar)
+                # 推送5分钟线数据
+                self.onFiveBar(fiveBar)
                 
-        #         # 清空5分钟线数据缓存
-        #         self.fiveBar = None
-        # else:
-        #     # 如果没有缓存则新建
-        #     if not self.fiveBar:
-        #         fiveBar = VtBarData()
+                # 清空5分钟线数据缓存
+                self.fiveBar = None
+        else:
+            # 如果没有缓存则新建
+            if not self.fiveBar:
+                fiveBar = VtBarData()
                 
-        #         fiveBar.vtSymbol = bar.vtSymbol
-        #         fiveBar.symbol = bar.symbol
-        #         fiveBar.exchange = bar.exchange
+                fiveBar.vtSymbol = bar.vtSymbol
+                fiveBar.symbol = bar.symbol
+                fiveBar.exchange = bar.exchange
             
-        #         fiveBar.open = bar.open
-        #         fiveBar.high = bar.high
-        #         fiveBar.low = bar.low
-        #         fiveBar.close = bar.close
+                fiveBar.open = bar.open
+                fiveBar.high = bar.high
+                fiveBar.low = bar.low
+                fiveBar.close = bar.close
             
-        #         fiveBar.date = bar.date
-        #         fiveBar.time = bar.time
-        #         fiveBar.datetime = bar.datetime 
+                fiveBar.date = bar.date
+                fiveBar.time = bar.time
+                fiveBar.datetime = bar.datetime 
                 
-        #         self.fiveBar = fiveBar
-        #     else:
-        #         fiveBar = self.fiveBar
-        #         fiveBar.high = max(fiveBar.high, bar.high)
-        #         fiveBar.low = min(fiveBar.low, bar.low)
-        #         fiveBar.close = bar.close
+                self.fiveBar = fiveBar
+            else:
+                fiveBar = self.fiveBar
+                fiveBar.high = max(fiveBar.high, bar.high)
+                fiveBar.low = min(fiveBar.low, bar.low)
+                fiveBar.close = bar.close
     '''
     数字记录栏
     '''
@@ -608,7 +607,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(LivermoreThirtyStrategy, d)
+    engine.initStrategy(Livermore_2_Strategy, d)
     
     # 开始跑回测
     engine.runBacktesting()

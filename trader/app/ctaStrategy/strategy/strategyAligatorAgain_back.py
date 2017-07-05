@@ -33,9 +33,9 @@ from vnpy.trader.app.ctaStrategy.ctaTemplate import CtaTemplate
 '''
 
 ########################################################################
-class AlligatoragainStrategy(CtaTemplate):
+class Alligatoragain_back_Strategy(CtaTemplate):
     """基于King Keltner通道的交易策略"""
-    className = 'AlligatoragainStrategy'
+    className = 'Alligatoragain_back_Strategy'
     author = u'ipqhjjybj'
 
     # 策略参数
@@ -105,7 +105,7 @@ class AlligatoragainStrategy(CtaTemplate):
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
         """Constructor"""
-        super(AlligatoragainStrategy, self).__init__(ctaEngine, setting)
+        super(Alligatoragain_back_Strategy, self).__init__(ctaEngine, setting)
         
     #----------------------------------------------------------------------
     def onInit(self):

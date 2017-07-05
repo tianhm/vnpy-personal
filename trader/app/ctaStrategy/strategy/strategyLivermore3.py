@@ -57,11 +57,11 @@ livermore 策略
 # 如今在自然回撤、自然回升上添加操作。
 '''
 ##################################################################
-
-class LivermoreStrategy3(CtaTemplate):
+LivermoreThirtyStrategy
+class Livermore_3_Strategy(CtaTemplate):
     """基于livermore策略的交易策略"""
 
-    className = 'LivermoreStrategy3'
+    className = 'Livermore_3_Strategy'
     author = u'ipqhjjybj'
 
     # 策略参数
@@ -136,7 +136,7 @@ class LivermoreStrategy3(CtaTemplate):
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
         """Constructor"""
-        super(LivermoreStrategy3, self).__init__(ctaEngine, setting)
+        super(Livermore_3_Strategy, self).__init__(ctaEngine, setting)
 
         for key in setting.keys():
             if key == "param1":
@@ -652,7 +652,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(LivermoreStrategy3, d)
+    engine.initStrategy(Livermore_3_Strategy, d)
     
     # 开始跑回测
     engine.runBacktesting()
