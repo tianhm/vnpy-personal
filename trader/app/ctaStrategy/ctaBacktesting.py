@@ -1060,12 +1060,8 @@ if __name__ == '__main__':
     # 建议使用ipython notebook或者spyder来做回测
     # 同样可以在命令模式下进行回测（一行一行输入运行）
     from strategy.strategyEmaDemo import *
-    #from strategy.LivermoreStrategy import *
-    from strategy.LivermoreStrategy2 import *
-    from strategy.LivermoreStrategy3 import *
-    from strategy.Alligator import *
-    from strategy.strategyAligatorAgain import *
-    #from strategy.strategyAligatorAgain____back import *
+    from strategy.strategyLivermore2 import *
+    from strategy.strategyLivermore4 import *
 
     # 创建回测引擎
     engine = BacktestingEngine()
@@ -1085,16 +1081,18 @@ if __name__ == '__main__':
 
     #engine.setSlippage(0.2)     # 股指1跳
     engine.setSlippage(1.0)      
-    engine.setRate(0.3/10000)    # 万0.3
+    engine.setRate(1.29/10000)    # 万0.3
 
-    engine.setSize(300)          # 股指合约大小  ,     一跳
+    engine.setSize(10)          # 股指合约大小  ,     一跳
     
     # 在引擎中创建策略对象
     #engine.initStrategy(EmaDemoStrategy, {})
     #engine.initStrategy(LivermoreStrategy, {"param1":4 , "param2":2})
     #engine.initStrategy(AlligatorStrategy, {})
 
-    engine.initStrategy(LivermoreStrategy2, {"param1":14 , "param2":10})
+    #engine.initStrategy(LivermoreStrategy2, {"param1":14 , "param2":10})
+    engine.initStrategy(Livermore_2_Strategy , {"param1":60 , "param2":30 , "minute_use":60})
+    #engine.initStrategy(Livermore_4_Strategy , {"param1":14 , "param2":10, "param3":2})
     #engine.initStrategy(LivermoreStrategy3, {"param1":14 , "param2":10})
     
     #engine.initStrategy(AlligatoragainStrategy, {})

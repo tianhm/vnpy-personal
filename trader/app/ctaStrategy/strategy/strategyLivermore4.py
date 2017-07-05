@@ -52,25 +52,21 @@ BLACK_LINE     = "b"        # 下降趋势以及自然回升形成的点下标�
 
 '''
 livermore 策略
+这策略, 是检测这个买入， 在上一个下降趋势的终点附近， 得到买入信号。
+也就是在关键点附近进行买与卖。。
 
-# 原本是顺势操作。。 
-# 如今在自然回撤、自然回升上添加操作。
 '''
 ##################################################################
-LivermoreThirtyStrategy
-class Livermore_3_Strategy(CtaTemplate):
+class Livermore_4_Strategy(CtaTemplate):
     """基于livermore策略的交易策略"""
 
-    className = 'Livermore_3_Strategy'
+    className = 'Livermore_4_Strategy'
     author = u'ipqhjjybj'
 
     # 策略参数
     param1 = 6                  # 每次变化 param1 画K线的数
     param2 = 3                  # 突破 param2 多少确定趋势
-    param3 = 50                 # 回升上一个区间的百分之多少时，开始下单     38.2 , 50 , 61.8 , 100
-
-    short_wg_enter = 0          # 是否采取网格开空
-    long_wg_enter = 0           # 是否采取网格开多
+    param3 = 2                  # 距离红黑线多少点附近时，开多开空
 
     zhangDiePoint = 10          # 涨跌多少点开多开空
 
@@ -124,28 +120,30 @@ class Livermore_3_Strategy(CtaTemplate):
                  'className',
                  'author',
                  'vtSymbol',
-                 ]    
+                 'param1',
+                 'param2',
+                 'param3']    
 
     # 变量列表，保存了变量的名称
     varList = ['inited',
                'trading',
-               'pos',
-               'param1',
-               'param2',]  
+               'pos'
+               ]  
 
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
         """Constructor"""
-        super(Livermore_3_Strategy, self).__init__(ctaEngine, setting)
+        super(Livermore_4_Strategy, self).__init__(ctaEngine, setting)
 
         for key in setting.keys():
             if key == "param1":
                 self.param1 = setting[key]
             if key == "param2":
                 self.param2 = setting[key]
+            if key == "param3":
+                self.param3 = setting[key]
 
-                
-        #print setting
+        print setting
     #----------------------------------------------------------------------
     def onInit(self):
         """初始化策略（必须由用户继承实现）"""
@@ -324,6 +322,18 @@ class Livermore_3_Strategy(CtaTemplate):
                     self.number_zrhs[-i] = (self.number_zrhs[-i][0] , self.number_zrhs[-i][1] , NoBelowLine) 
                     #self.number_zrhs[-i][2] = NoBelowLine
         return big_condition
+
+    '''
+    判断邻近买入
+    '''
+    def judge_near(self , y , param3):
+        if len(self.number_ssqs) > 0:
+            if abs( y - self.number_ssqs[-1][1]) < param3:
+                return -1
+        if len(self.number_xjqs) > 0:
+            if abs( y - self.number_xjqs[-1][1]) < param3:
+                return 1
+        return 0
 
     # livermore 策略 核心判断函数
     def judge(self, t_klinePoint , t_ori_data):
@@ -505,80 +515,43 @@ class Livermore_3_Strategy(CtaTemplate):
 
         self.big_condArray.append(self.big_condition)
 
-        #判断上一个趋势是下降趋势 ， 还是上升趋势。。
-        judge_pre_big_condition = 0
-        for i in range(1,len(self.big_condArray)):
-            if self.big_condArray[-i] in [ShangShenQuShi , XiaJiangQushi]:
-                if self.big_condArray[-i] == ShangShenQuShi:
-                    judge_pre_big_condition = 1
-                else:
-                    judge_pre_big_condition = -1
-        
+        sec_func = 0
+        if self.big_condition not in [ShangShenQuShi , XiaJiangQushi]:
+            sec_func = self.judge_near( bar.close ,  self.param3)
 
+        if sec_func > 0:
+            if self.pos <= 0:
+                if self.pos < 0:
+                    orderID = self.cover(bar.close , abs(self.pos))
+                    self.limitOrderList.append(orderID)
+                orderID = self.buy(bar.close , self.fixedSize)
+                self.limitOrderList.append(orderID)
+        if sec_func < 0:
+            if self.pos >= 0:
+                if self.pos > 0:
+                    orderID = self.sell(bar.close , abs(self.pos))
+                orderID = self.short(bar.close , self.fixedSize)
+                self.limitOrderList.append(orderID)
+        #print bar.datetime
         # 判断是否要进行交易
-
         buy_cond  = 0
         sell_cond = 0
 
-        if self.big_condArray[-2] == ShangShenQuShi and self.big_condition == ZiRanHuiChe:
-            (p1,p2,cc_dition)= self.QuJianPairs[-1]
-            abs_y = abs(p1[1] - p2[1])
-            ys1 = self.start_point[1]
-            if bar.close < p2[1] - abs_y * self.param3 / 100.0:
-                self.long_wg_enter = 1
-        
-        if self.big_condArray[-2] == XiaJiangQushi and self.big_condition == ZiRanHuiShen:
-            (p1,p2,cc_dition)= self.QuJianPairs[-1]
-            abs_y = abs(p1[1] - p2[1])
-            ys1 = self.start_point[1]
-            if bar.close > p2[1] + abs_y * self.param3 / 100.0:
-                self.short_wg_enter = 1
-
-        if self.big_condition in [XiaJiangQushi,ShangShenQuShi]:
-            self.long_wg_enter = 0
-            self.short_wg_enter = 0
-
-
-
         # 表示状态出现改变
         # Version 1.0 ,
-        # if self.big_condition == ShangShenQuShi or (self.long_wg_enter == 1):
-        #     buy_cond = 1
-        # if self.big_condition == XiaJiangQushi or (self.short_wg_enter == 1): 
-        #     sell_cond = 1
-
-        if self.long_wg_enter == 1:
+        if self.big_condition == ShangShenQuShi:
             buy_cond = 1
-        if self.short_wg_enter == 1: 
+        if self.big_condition == XiaJiangQushi:
             sell_cond = 1
 
-        #if self.long_wg_enter == 1:
-        #    print self.big_condition
-        if self.pos == 0:
-            if buy_cond  == 1:
-                orderID = self.buy(  bar.close , self.fixedSize )
-                self.limitOrderList.append(orderID)
-            if sell_cond == 1:
-                orderID = self.short( bar.close , self.fixedSize)
-                self.limitOrderList.append(orderID)
+        if self.pos > 0 and sell_cond == 1:
+            orderID = self.sell(bar.close , abs(self.pos))
+            self.limitOrderList.append(orderID)
 
-        if self.pos > 0:
-            if buy_cond == 0:
-                orderID = self.sell(bar.close , abs(self.pos))
-                self.limitOrderList.append(orderID)
-            if sell_cond == 1:
-                orderID = self.short(bar.close , self.fixedSize)
-                self.limitOrderList.append(orderID)
+        if self.pos < 0 and buy_cond == 1:
+            orderID = self.cover(bar.close , abs(self.pos))
+            self.limitOrderList.append(orderID)
 
-        if self.pos < 0:
-            if sell_cond == 0:
-                orderID = self.cover(bar.close , abs(self.pos))
-                self.limitOrderList.append(orderID)
-            if buy_cond == 1:
-                orderID = self.buy(bar.close , self.fixedSize)
-                self.limitOrderList.append(orderID)
-
-    
         # 发出状态更新事件
         self.putEvent()        
 
@@ -650,7 +623,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(Livermore_3_Strategy, d)
+    engine.initStrategy(Livermore_4_Strategy, d)
     
     # 开始跑回测
     engine.runBacktesting()
