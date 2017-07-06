@@ -67,6 +67,7 @@ class Livermore_4_Strategy(CtaTemplate):
     param1 = 6                  # 每次变化 param1 画K线的数
     param2 = 3                  # 突破 param2 多少确定趋势
     param3 = 2                  # 距离红黑线多少点附近时，开多开空
+    minute_use = 30             # 分钟级别
 
     zhangDiePoint = 10          # 涨跌多少点开多开空
 
@@ -215,7 +216,7 @@ class Livermore_4_Strategy(CtaTemplate):
     def onBar(self, bar):
         """收到Bar推送（必须由用户继承实现）"""
         # 如果当前是一个5分钟走完
-        if bar.datetime.minute % 5 == 0:
+        if bar.datetime.minute % self.minute_use == 0:
             # 如果已经有聚合5分钟K线
             if self.fiveBar:
                 # 将最新分钟的数据更新到目前5分钟线中
@@ -517,7 +518,7 @@ class Livermore_4_Strategy(CtaTemplate):
 
         sec_func = 0
         if self.big_condition not in [ShangShenQuShi , XiaJiangQushi]:
-            sec_func = self.judge_near( bar.close ,  self.param3)
+            sec_func = self.judge_near( bar.low ,  self.param3)
 
         if sec_func > 0:
             if self.pos <= 0:

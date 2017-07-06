@@ -1070,20 +1070,23 @@ if __name__ == '__main__':
     engine.setBacktestingMode(engine.BAR_MODE)
 
     # 设置回测用的数据起始日期
-    #engine.setStartDate('20110101')
-    engine.setStartDate('20130101')
+    engine.setStartDate('20110101')
+    #engine.setStartDate('20130101')
+    #engine.setEndDate('20130401')
     #engine.setEndDate('20140201')
     
     # 载入历史数据到引擎中
-    engine.setDatabase(MINUTE_DB_NAME, 'rb888')
+    #engine.setDatabase(MINUTE_DB_NAME, 'rb888')
+    #engine.setDatabase(MINUTE_DB_NAME, 'hc888')
+    engine.setDatabase(MINUTE_DB_NAME, 'au888')
     
     # 设置产品相关参数
 
-    #engine.setSlippage(0.2)     # 股指1跳
-    engine.setSlippage(1.0)      
+    engine.setSlippage(0.05)     # 股指1跳
+    # engine.setSlippage(1.0)      
     engine.setRate(1.29/10000)    # 万0.3
 
-    engine.setSize(10)          # 股指合约大小  ,     一跳
+    engine.setSize(1000)          # 股指合约大小  ,     一跳
     
     # 在引擎中创建策略对象
     #engine.initStrategy(EmaDemoStrategy, {})
@@ -1091,10 +1094,10 @@ if __name__ == '__main__':
     #engine.initStrategy(AlligatorStrategy, {})
 
     #engine.initStrategy(LivermoreStrategy2, {"param1":14 , "param2":10})
-    engine.initStrategy(Livermore_2_Strategy , {"param1":60 , "param2":30 , "minute_use":60})
-    #engine.initStrategy(Livermore_4_Strategy , {"param1":14 , "param2":10, "param3":2})
+    engine.initStrategy(Livermore_2_Strategy , {"param1":0.2 , "param2":0.05 , "minute_use":15})
+    #engine.initStrategy(Livermore_4_Strategy , {"param1":30 , "param2":10, "param3":2 ,"minute_use":15})
     #engine.initStrategy(LivermoreStrategy3, {"param1":14 , "param2":10})
-    
+
     #engine.initStrategy(AlligatoragainStrategy, {})
     
     # 开始跑回测
@@ -1103,6 +1106,7 @@ if __name__ == '__main__':
     # 显示回测结果
     # spyder或者ipython notebook中运行时，会弹出盈亏曲线图
     # 直接在cmd中回测则只会打印一些回测数值
+    #engine.showBacktestingResult(whetherDebug = True)
     engine.showBacktestingResult(whetherDebug = False)
     
     

@@ -48,7 +48,6 @@ if __name__ == '__main__':
     setting.setOptimizeTarget('capital')              # 设置优化排序的目标是策略净盈利
     setting.addParameter('param1',  10  , 200 , 5)      # 增加第一个优化参数atrLength，起始12，结束20，步进2
     setting.addParameter('param2',  10 , 120,  5)          
-
     
     #setting = OptimizationSetting()
 

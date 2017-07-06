@@ -451,7 +451,10 @@ if __name__ == '__main__':
     # loadMcCsv('IF0000_1min.csv', MINUTE_DB_NAME, 'IF0000')
     #导入通达信历史分钟数据
     #loadTdxCsv('CL8.csv', MINUTE_DB_NAME, 'c0000')
-    loadTdxCsv('C:/Users/Administrator/Desktop/tb_output/rb888_30minute.csv', THIRTY_MINUTE_DB_NAME, "rb888")
+    loadTdxCsv('C:/Users/Administrator/Desktop/tmp/au888_min1.csv', MINUTE_DB_NAME, "au888")
+    #loadTdxCsv('C:/Users/Administrator/Desktop/tmp/hc888_min1.csv', MINUTE_DB_NAME, "hc888")
+    #loadTdxCsv('C:/Users/Administrator/Desktop/tmp/rb888_min1.csv', MINUTE_DB_NAME, "rb888")
+    #loadTdxCsv('C:/Users/Administrator/Desktop/tb_output/rb888_30minute.csv', THIRTY_MINUTE_DB_NAME, "rb888")
     #loadTdxCsv('C:/Users/Administrator/Desktop/tb_output/hc888_hour.csv', HOUR_DB_NAME, "hc888")
     #loadTdxCsv('C:/Users/Administrator/Desktop/tb_output/rb888_hour.csv', HOUR_DB_NAME, "rb888")
     #loadTdxCsv('C:/Users/Administrator/Desktop/tb_output/rb1710.csv', MINUTE_DB_NAME, 'rb1710')
