@@ -5,7 +5,7 @@ import shelve
 from collections import OrderedDict
 from datetime import datetime
 
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from pymongo.errors import ConnectionFailure
 
 from vnpy.event import Event
@@ -13,6 +13,7 @@ from vnpy.trader.vtGlobal import globalSetting
 from vnpy.trader.vtEvent import *
 from vnpy.trader.vtGateway import *
 from vnpy.trader.language import text
+from vnpy.trader.vtFunction import getTempPath
 
 
 ########################################################################
@@ -208,12 +209,17 @@ class MainEngine(object):
             self.writeLog(text.DATA_INSERT_FAILED)
     
     #----------------------------------------------------------------------
-    def dbQuery(self, dbName, collectionName, d):
+    def dbQuery(self, dbName, collectionName, d, sortKey='', sortDirection=ASCENDING):
         """从MongoDB中读取数据，d是查询要求，返回的是数据库查询的指针"""
         if self.dbClient:
             db = self.dbClient[dbName]
             collection = db[collectionName]
-            cursor = collection.find(d)
+            
+            if sortKey:
+                cursor = collection.find(d).sort(sortKey, sortDirection)    # 对查询出来的数据进行排序
+            else:
+                cursor = collection.find(d)
+
             if cursor:
                 return list(cursor)
             else:
@@ -278,8 +284,7 @@ class MainEngine(object):
 class DataEngine(object):
     """数据引擎"""
     contractFileName = 'ContractData.vt'
-    path = os.path.abspath(os.path.dirname(__file__)) 
-    contractFileName = os.path.join(path, 'temp', contractFileName)
+    contractFilePath = getTempPath(contractFileName)
 
     #----------------------------------------------------------------------
     def __init__(self, eventEngine):
@@ -324,14 +329,14 @@ class DataEngine(object):
     #----------------------------------------------------------------------
     def saveContracts(self):
         """保存所有合约对象到硬盘"""
-        f = shelve.open(self.contractFileName)
+        f = shelve.open(self.contractFilePath)
         f['data'] = self.contractDict
         f.close()
     
     #----------------------------------------------------------------------
     def loadContracts(self):
         """从硬盘读取合约对象"""
-        f = shelve.open(self.contractFileName)
+        f = shelve.open(self.contractFilePath)
         if 'data' in f:
             d = f['data']
             for key, value in d.items():
