@@ -61,23 +61,29 @@ livermore 策略
 当震荡转趋势时，全部止损
 '''
 ##################################################################
-class Livermore_4_Strategy(CtaTemplate):
+class Livermore_5_Strategy(CtaTemplate):
     """基于livermore策略的交易策略"""
 
-    className = 'Livermore_4_Strategy'
+    className = 'Livermore_5_Strategy'
     author = u'ipqhjjybj'
 
     # 策略参数
-    param1 = 30                  # 每次变化 param1 画K线的数
-    param2 = 15                  # 突破 param2 多少确定趋势
-    param3 = 4                  # 距离红黑线多少点附近时，开多开空
+    param1 = 30                 # 每次变化 param1 画K线的数
+    param2 = 15                 # 突破 param2 多少确定趋势
+
     minute_use = 30             # 分钟级别
 
-    #kai_down = 5                # 网格的偏离点数
-    #wg_size  = 4 
+    wg_size  = 5                # 网格的大小
+    kai_down = 8                # 网格的向下偏离点数
+    kai_up   = 4                # 网格的向上偏离点数
+
+    real_kai_down = 0.0         # 实际往下开的值
+    real_kai_down_ping = 0.0    # 实际下面开的单，什么点位平
+
+    real_kai_up   = 0.0         # 实际往上开的值
+    real_kai_up_ping = 0.0      # 实际上面开的单，什么点位平
 
     zhangDiePoint = 10          # 涨跌多少点开多开空
-
 
     # 策略变量
     bar = None                  # 1分钟K线对象
@@ -141,7 +147,7 @@ class Livermore_4_Strategy(CtaTemplate):
     #----------------------------------------------------------------------
     def __init__(self, ctaEngine, setting):
         """Constructor"""
-        super(Livermore_4_Strategy, self).__init__(ctaEngine, setting)
+        super(Livermore_5_Strategy, self).__init__(ctaEngine, setting)
 
         for key in setting.keys():
             if key == "param1":
@@ -150,7 +156,12 @@ class Livermore_4_Strategy(CtaTemplate):
                 self.param2 = setting[key]
             if key == "param3":
                 self.param3 = setting[key]
+            if key == "kai_down":
+                self.kai_down = setting[key]
+            if key == "kai_up":
+                self.kai_up = setting[key]
 
+        print self.kai_down,self.kai_up
         print setting
     #----------------------------------------------------------------------
     def onInit(self):
@@ -331,18 +342,6 @@ class Livermore_4_Strategy(CtaTemplate):
                     #self.number_zrhs[-i][2] = NoBelowLine
         return big_condition
 
-    '''
-    判断邻近买入
-    '''
-    def judge_near(self , y , param3):
-        if len(self.number_ssqs) > 0:
-            if abs( y - self.number_ssqs[-1][1]) < param3:
-                return -1
-        if len(self.number_xjqs) > 0:
-            if abs( y - self.number_xjqs[-1][1]) < param3:
-                return 1
-        return 0
-
     # livermore 策略 核心判断函数
     def judge(self, t_klinePoint , t_ori_data):
         (pl_x, pl_y , pl_condition , pl_color) = t_klinePoint
@@ -478,6 +477,9 @@ class Livermore_4_Strategy(CtaTemplate):
         for orderID in self.limitOrderList:
             self.cancelOrder(orderID)
 
+        for orderID in self.stopOrderList:
+            self.cancelOrder(orderID)
+
         #print bar.close , bar.datetime
         # 保存K线数据
         self.closeArray[0:self.bufferSize-1] = self.closeArray[1:self.bufferSize]
@@ -523,45 +525,36 @@ class Livermore_4_Strategy(CtaTemplate):
 
         self.big_condArray.append(self.big_condition)
 
-        sec_func = 0
-        if self.big_condition not in [ShangShenQuShi , XiaJiangQushi]:
-            sec_func = self.judge_near( bar.low ,  self.param3)
+        if self.big_condArray[-2] in [ShangShenQuShi, XiaJiangQushi] and self.big_condition not in [ShangShenQuShi, XiaJiangQushi]:
+            #print str(bar.datetime) + " start make wg" 
+            self.flag_wg = 1
 
-        if sec_func > 0:
-            if self.pos <= 0:
-                if self.pos < 0:
-                    orderID = self.cover(bar.close , abs(self.pos))
-                    self.limitOrderList.append(orderID)
-                orderID = self.buy(bar.close , self.fixedSize)
+            self.real_kai_down      = bar.close - self.wg_size - self.kai_down
+            self.real_kai_down_ping = self.real_kai_down + 2 * self.wg_size
+
+            self.real_kai_up        = bar.close + self.wg_size + self.kai_up
+            self.real_kai_up_ping   = self.real_kai_up - 2 * self.wg_size
+            
+            if self.pos == 0:
+                orderID = self.buy(self.real_kai_down , abs(self.fixedSize))
                 self.limitOrderList.append(orderID)
-        if sec_func < 0:
-            if self.pos >= 0:
-                if self.pos > 0:
-                    orderID = self.sell(bar.close , abs(self.pos))
-                orderID = self.short(bar.close , self.fixedSize)
+
+        if self.pos > 0:
+            orderID = self.sell( self.real_kai_down_ping , abs(self.pos) , stop = True)
+            self.stopOrderList.append(orderID)
+
+
+        if self.big_condition in [ShangShenQuShi, XiaJiangQushi]:
+            self.flag_wg = 0
+            if self.pos > 0:
+                orderID = self.sell(bar.close , abs(self.pos))
                 self.limitOrderList.append(orderID)
-        #print bar.datetime
-        # 判断是否要进行交易
-        buy_cond  = 0
-        sell_cond = 0
-
-        # 表示状态出现改变
-        # Version 1.0 ,
-        if self.big_condition == ShangShenQuShi:
-            buy_cond = 1
-        if self.big_condition == XiaJiangQushi:
-            sell_cond = 1
-
-        if self.pos > 0 and sell_cond == 1:
-            orderID = self.sell(bar.close , abs(self.pos))
-            self.limitOrderList.append(orderID)
-
-        if self.pos < 0 and buy_cond == 1:
-            orderID = self.cover(bar.close , abs(self.pos))
-            self.limitOrderList.append(orderID)
+            if self.pos < 0:
+                orderID = self.cover(bar.close , abs(self.pos))
+                self.limitOrderList.append(orderID)
 
         # 发出状态更新事件
-        self.putEvent()        
+        self.putEvent() 
 
     #----------------------------------------------------------------------
     def onOrder(self, order):
@@ -588,23 +581,7 @@ class Livermore_4_Strategy(CtaTemplate):
         # 发出状态更新事件
         self.putEvent()
         
-    #----------------------------------------------------------------------
-    def sendOcoOrder(self, buyPrice, shortPrice, volume):
-        """
-        发送OCO委托
-        
-        OCO(One Cancel Other)委托：
-        1. 主要用于实现区间突破入场
-        2. 包含两个方向相反的停止单
-        3. 一个方向的停止单成交后会立即撤消另一个方向的
-        """
-        # 发送双边的停止单委托，并记录委托号
-        self.buyOrderID = self.buy(buyPrice, volume, True)
-        self.shortOrderID = self.short(shortPrice, volume, True)
-        
-        # 将委托号记录到列表中
-        self.orderList.append(self.buyOrderID)
-        self.orderList.append(self.shortOrderID)
+    
 
 
 if __name__ == '__main__':
@@ -631,7 +608,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(Livermore_4_Strategy, d)
+    engine.initStrategy(Livermore_5_Strategy, d)
     
     # 开始跑回测
     engine.runBacktesting()

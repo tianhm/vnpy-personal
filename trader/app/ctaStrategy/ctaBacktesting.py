@@ -1059,9 +1059,11 @@ if __name__ == '__main__':
     # 以下内容是一段回测脚本的演示，用户可以根据自己的需求修改
     # 建议使用ipython notebook或者spyder来做回测
     # 同样可以在命令模式下进行回测（一行一行输入运行）
-    from strategy.strategyEmaDemo import *
-    from strategy.strategyLivermore2 import *
-    from strategy.strategyLivermore4 import *
+    from strategy.strategyKingKeltner import *
+    #from strategy.strategyEmaDemo import *
+    #from strategy.strategyLivermore2 import *
+    #from strategy.strategyLivermore4 import *
+    from strategy.strategyLivermore5 import *
 
     # 创建回测引擎
     engine = BacktestingEngine()
@@ -1070,23 +1072,33 @@ if __name__ == '__main__':
     engine.setBacktestingMode(engine.BAR_MODE)
 
     # 设置回测用的数据起始日期
+    '''
     engine.setStartDate('20110101')
-    #engine.setStartDate('20130101')
-    #engine.setEndDate('20130401')
-    #engine.setEndDate('20140201')
-    
-    # 载入历史数据到引擎中
-    #engine.setDatabase(MINUTE_DB_NAME, 'rb888')
-    #engine.setDatabase(MINUTE_DB_NAME, 'hc888')
+
     engine.setDatabase(MINUTE_DB_NAME, 'au888')
+
+    engine.setSlippage(0.05)      # 股指1跳
+    engine.setRate(1.29/10000)    # 万0.3
+    engine.setSize(1000)          # 股指合约大小  , 一跳
+    
+    engine.initStrategy(Livermore_2_Strategy , {"param1":0.012 , "param2":0.005 , "minute_use":15})
+    '''
+
+    # 载入历史数据到引擎中
+    engine.setStartDate('20110101')
+
+    engine.setDatabase(MINUTE_DB_NAME, 'rb888')
+    #engine.setDatabase(MINUTE_DB_NAME, 'hc888')
+    #engine.setDatabase(MINUTE_DB_NAME, 'au888')
     
     # 设置产品相关参数
 
-    engine.setSlippage(0.05)     # 股指1跳
-    # engine.setSlippage(1.0)      
+    #engine.setSlippage(0.5)      # 股指1跳
+    
+    engine.setSlippage(1.0)      
     engine.setRate(1.29/10000)    # 万0.3
 
-    engine.setSize(1000)          # 股指合约大小  ,     一跳
+    engine.setSize(10)          # 股指合约大小  , 一跳
     
     # 在引擎中创建策略对象
     #engine.initStrategy(EmaDemoStrategy, {})
@@ -1094,11 +1106,18 @@ if __name__ == '__main__':
     #engine.initStrategy(AlligatorStrategy, {})
 
     #engine.initStrategy(LivermoreStrategy2, {"param1":14 , "param2":10})
-    engine.initStrategy(Livermore_2_Strategy , {"param1":0.2 , "param2":0.05 , "minute_use":15})
+    #engine.initStrategy(Livermore_2_Strategy , {"param1":0.012 , "param2":0.005 , "minute_use":15})
+
+    #engine.initStrategy(Livermore_5_Strategy , {"param1":30 , "param2":10 , "minute_use":15})
+
+    engine.initStrategy(KkStrategy )
+
+    #engine.initStrategy(Livermore_2_Strategy , {"param1":30 , "param2":10 , "minute_use":15})
     #engine.initStrategy(Livermore_4_Strategy , {"param1":30 , "param2":10, "param3":2 ,"minute_use":15})
     #engine.initStrategy(LivermoreStrategy3, {"param1":14 , "param2":10})
 
     #engine.initStrategy(AlligatoragainStrategy, {})
+    
     
     # 开始跑回测
     engine.runBacktesting()

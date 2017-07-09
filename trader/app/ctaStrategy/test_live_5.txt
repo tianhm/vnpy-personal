@@ -1,0 +1,111 @@
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyAligatorAgain:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyAligatorAgain_back:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyAlligator:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermore:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermore2:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermore3:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermore4:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermore5:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermoreHour:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermoreThirty:
+--------------------
+Failed to import strategy file vnpy.trader.app.ctaStrategy.strategy.strategyLivermore3:
+2017-07-09 19:30:23.541000	------------------------------
+2017-07-09 19:30:23.541000	setting: {'kai_down': 40, 'wg_size': 5, 'minute_use': 30, 'param2': 10, 'param1': 30}
+40 4
+{'kai_down': 40, 'wg_size': 5, 'minute_use': 30, 'param2': 10, 'param1': 30}
+2017-07-09 19:30:23.541000	开始载入数据
+2017-07-09 19:30:23.636000	载入完成，数据量：465082
+2017-07-09 19:30:23.636000	开始回测
+30 10
+2017-07-09 19:30:23.640000	策略初始化完成
+2017-07-09 19:30:23.640000	策略启动完成
+2017-07-09 19:30:23.640000	开始回放数据
+2017-07-09 19:30:40.211000	数据回放结束
+2017-07-09 19:30:40.211000	计算回测结果
+{'kai_down': 40, 'wg_size': 5, 'minute_use': 30, 'param2': 10, 'param1': 30}
+1137.76645
+2017-07-09 19:30:40.211000	------------------------------
+2017-07-09 19:30:40.211000	setting: {'kai_down': 40, 'wg_size': 10, 'minute_use': 30, 'param2': 10, 'param1': 30}
+40 4
+{'kai_down': 40, 'wg_size': 10, 'minute_use': 30, 'param2': 10, 'param1': 30}
+2017-07-09 19:30:40.211000	开始回测
+30 10
+2017-07-09 19:30:40.221000	策略初始化完成
+2017-07-09 19:30:40.221000	策略启动完成
+2017-07-09 19:30:40.221000	开始回放数据
+2017-07-09 19:30:50.776000	数据回放结束
+2017-07-09 19:30:50.776000	计算回测结果
+{'kai_down': 40, 'wg_size': 10, 'minute_use': 30, 'param2': 10, 'param1': 30}
+1137.76645
+2017-07-09 19:30:50.777000	------------------------------
+2017-07-09 19:30:50.777000	setting: {'kai_down': 40, 'wg_size': 15, 'minute_use': 30, 'param2': 10, 'param1': 30}
+40 4
+{'kai_down': 40, 'wg_size': 15, 'minute_use': 30, 'param2': 10, 'param1': 30}
+2017-07-09 19:30:50.777000	开始回测
+30 10
+2017-07-09 19:30:50.791000	策略初始化完成
+2017-07-09 19:30:50.792000	策略启动完成
+2017-07-09 19:30:50.792000	开始回放数据
+2017-07-09 19:31:03.705000	数据回放结束
+2017-07-09 19:31:03.705000	计算回测结果
+{'kai_down': 40, 'wg_size': 15, 'minute_use': 30, 'param2': 10, 'param1': 30}
+1137.76645
+2017-07-09 19:31:03.705000	------------------------------
+2017-07-09 19:31:03.705000	setting: {'kai_down': 40, 'wg_size': 20, 'minute_use': 30, 'param2': 10, 'param1': 30}
+40 4
+{'kai_down': 40, 'wg_size': 20, 'minute_use': 30, 'param2': 10, 'param1': 30}
+2017-07-09 19:31:03.705000	开始回测
+30 10
+2017-07-09 19:31:03.725000	策略初始化完成
+2017-07-09 19:31:03.725000	策略启动完成
+2017-07-09 19:31:03.725000	开始回放数据
+2017-07-09 19:31:19.023000	数据回放结束
+2017-07-09 19:31:19.023000	计算回测结果
+{'kai_down': 40, 'wg_size': 20, 'minute_use': 30, 'param2': 10, 'param1': 30}
+1137.76645
+2017-07-09 19:31:19.023000	------------------------------
+2017-07-09 19:31:19.023000	setting: {'kai_down': 40, 'wg_size': 25, 'minute_use': 30, 'param2': 10, 'param1': 30}
+40 4
+{'kai_down': 40, 'wg_size': 25, 'minute_use': 30, 'param2': 10, 'param1': 30}
+2017-07-09 19:31:19.023000	开始回测
+30 10
+2017-07-09 19:31:19.049000	策略初始化完成
+2017-07-09 19:31:19.049000	策略启动完成
+2017-07-09 19:31:19.049000	开始回放数据
+2017-07-09 19:31:36.644000	数据回放结束
+2017-07-09 19:31:36.644000	计算回测结果
+{'kai_down': 40, 'wg_size': 25, 'minute_use': 30, 'param2': 10, 'param1': 30}
+1137.76645
+2017-07-09 19:31:36.644000	------------------------------
+2017-07-09 19:31:36.644000	setting: {'kai_down': 40, 'wg_size': 30, 'minute_use': 30, 'param2': 10, 'param1': 30}
+40 4
+{'kai_down': 40, 'wg_size': 30, 'minute_use': 30, 'param2': 10, 'param1': 30}
+2017-07-09 19:31:36.644000	开始回测
+30 10
+2017-07-09 19:31:36.676000	策略初始化完成
+2017-07-09 19:31:36.676000	策略启动完成
+2017-07-09 19:31:36.676000	开始回放数据
+2017-07-09 19:31:56.722000	数据回放结束
+2017-07-09 19:31:56.722000	计算回测结果
+{'kai_down': 40, 'wg_size': 30, 'minute_use': 30, 'param2': 10, 'param1': 30}
+1137.76645
+2017-07-09 19:31:56.722000	------------------------------
+2017-07-09 19:31:56.722000	优化结果：
+2017-07-09 19:31:56.722000	["{'kai_down': 40, 'wg_size': 5, 'minute_use': 30, 'param2': 10, 'param1': 30}"]: 1137.76645
+2017-07-09 19:31:56.722000	["{'kai_down': 40, 'wg_size': 10, 'minute_use': 30, 'param2': 10, 'param1': 30}"]: 1137.76645
+2017-07-09 19:31:56.722000	["{'kai_down': 40, 'wg_size': 15, 'minute_use': 30, 'param2': 10, 'param1': 30}"]: 1137.76645
+2017-07-09 19:31:56.722000	["{'kai_down': 40, 'wg_size': 20, 'minute_use': 30, 'param2': 10, 'param1': 30}"]: 1137.76645
+2017-07-09 19:31:56.722000	["{'kai_down': 40, 'wg_size': 25, 'minute_use': 30, 'param2': 10, 'param1': 30}"]: 1137.76645
+2017-07-09 19:31:56.722000	["{'kai_down': 40, 'wg_size': 30, 'minute_use': 30, 'param2': 10, 'param1': 30}"]: 1137.76645
+耗时：93.1819999218

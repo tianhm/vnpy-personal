@@ -62,8 +62,8 @@ class Livermore_2_Strategy(CtaTemplate):
     author = u'ipqhjjybj'
 
     # 策略参数
-    param1 = 6                  # 每次变化 param1 画K线的数
-    param2 = 3                  # 突破 param2 多少确定趋势
+    param1 = 0.008                  # 每次变化 param1 画K线的数
+    param2 = 0.004                  # 突破 param2 多少确定趋势
     minute_use = 30             # 多少分钟级别的K线
 
     zhangDiePoint = 10          # 涨跌多少点开多开空
@@ -286,7 +286,7 @@ class Livermore_2_Strategy(CtaTemplate):
         if len(self.number_zrhc) > 0:
             for i in range(1 , len(self.number_zrhc) + 1):
                 if self.number_zrhc[-i][2] == RED_LINE :
-                    if y < self.number_zrhc[-i][1] - param2 :
+                    if y < self.number_zrhc[-i][1] * ( 1 - param2) :
                         self.conditionChangeType = 4
                         big_condition = XiaJiangQushi
                         to_drop_line = 1
@@ -309,7 +309,7 @@ class Livermore_2_Strategy(CtaTemplate):
         if len(self.number_zrhs) > 0:
             for i in range(1 , len(self.number_zrhs) + 1):
                 if self.number_zrhs[-i][2] == BLACK_LINE :
-                    if y > self.number_zrhs[-i][1] + param2 :
+                    if y > self.number_zrhs[-i][1] * ( 1 + param2) :
                         self.conditionChangeType = 2
                         big_condition = ShangShenQuShi
                         to_drop_line = 1
@@ -328,7 +328,7 @@ class Livermore_2_Strategy(CtaTemplate):
         if self.big_condition == ShangShenQuShi:
             if y > pl_y:
                 self.addToNumberFigure( x , y , self.big_condition) # 上升趋势延续，黑墨水描绘
-            elif y < pl_y  - self.param1 :
+            elif y < pl_y  * ( 1 - self.param1) :
                 #上个区间结束
                 self.QuJianPairs.append( (self.start_point, (pl_x,pl_y) , self.big_condition)) 
                 self.keyPointArr.append( (pl_x,pl_y,RED_LINE))
@@ -344,7 +344,7 @@ class Livermore_2_Strategy(CtaTemplate):
                 # 2、大于最近的带有黑色线的自然上升点
                 self.big_condition = self.judge_ssqs(self.big_condition , y , self.param2)
                 self.addToNumberFigure(x , y, self.big_condition)
-            elif y < pl_y - self.param1 :
+            elif y < pl_y * ( 1 - self.param1) :
 
                 self.QuJianPairs.append( (self.start_point , (pl_x,pl_y) , self.big_condition))
                 self.keyPointArr.append( (pl_x , pl_y , BLACK_LINE))
@@ -373,7 +373,7 @@ class Livermore_2_Strategy(CtaTemplate):
                 #判断次级回升为上升趋势
                 self.big_condition = self.judge_ssqs(self.big_condition, y, self.param2)
                 self.addToNumberFigure( x , y , self.big_condition) # 上升趋势延续，黑墨水描绘
-            elif y < pl_y - self.param1 :
+            elif y < pl_y * ( 1 - self.param1) :
                 #结束上一个状态
                 self.QuJianPairs.append((self.start_point , (pl_x, pl_y) , self.big_condition))
                 #开启下一个状态
@@ -393,7 +393,7 @@ class Livermore_2_Strategy(CtaTemplate):
         elif self.big_condition == XiaJiangQushi:
             if y < pl_y:
                 self.addToNumberFigure( x , y , self.big_condition)
-            elif y > pl_y + self.param1 :
+            elif y > pl_y * ( 1 + self.param1) :
                 # 上个区间结束
                 self.QuJianPairs.append( (self.start_point, (pl_x,pl_y) , self.big_condition))
                 self.keyPointArr.append( (pl_x,pl_y, BLACK_LINE))
@@ -407,7 +407,7 @@ class Livermore_2_Strategy(CtaTemplate):
                 # 自然回撤转下降趋势
                 self.big_condition = self.judge_xjqs(self.big_condition , y , self.param2)
                 self.addToNumberFigure( x , y, self.big_condition)
-            elif y > pl_y + self.param1 :
+            elif y > pl_y * ( 1 + self.param1) :
                 # 结束上一个状态
                 self.QuJianPairs.append( (self.start_point, (pl_x , pl_y) , self.big_condition))
                 self.keyPointArr.append( (pl_x , pl_y ,RED_LINE))
@@ -434,7 +434,7 @@ class Livermore_2_Strategy(CtaTemplate):
                 # 次级回撤转下降趋势
                 self.big_condition = self.judge_xjqs(self.big_condition , y, self.param2)
                 self.addToNumberFigure( x, y , self.big_condition)
-            elif y > pl_y + self.param1 :
+            elif y > pl_y * ( 1 + self.param1) :
                 # 上个区间结束
                 self.QuJianPairs.append( (self.start_point, (pl_x,pl_y) , self.big_condition))
                 #开启下一个状态

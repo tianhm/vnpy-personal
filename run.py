@@ -17,7 +17,7 @@ from vnpy.trader.gateway import (ctpGateway, femasGateway, xspeedGateway,
                                  shzdGateway, huobiGateway, okcoinGateway)
 
 # 加载上层应用
-from vnpy.trader.app import (riskManager, ctaStrategyUpdate )
+from vnpy.trader.app import (riskManager, spreadTrading ,ctaStrategy) #ctaStrategyUpdate
 
 
 #----------------------------------------------------------------------
@@ -42,7 +42,8 @@ def main():
     
     # 添加上层应用
     me.addApp(riskManager)
-    me.addApp(ctaStrategyUpdate)
+    #me.addApp(ctaStrategyUpdate)
+    me.addApp(ctaStrategy)
     
     # 创建主窗口
     mw = MainWindow(me, ee)

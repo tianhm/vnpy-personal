@@ -11,11 +11,9 @@ from vnpy.trader.app.ctaStrategy.ctaBacktesting import BacktestingEngine, MINUTE
 from ctaBase import *
 
 if __name__ == '__main__':
-    from vnpy.trader.app.ctaStrategy.strategy.strategyAtrRsi import AtrRsiStrategy
-    #from vnpy.trader.app.ctaStrategy.strategy.strategyLivermore import LivermoreStrategy
-    #from vnpy.trader.app.ctaStrategy.strategy.LivermoreStrategy2 import LivermoreStrategy2
-    #from vnpy.trader.app.ctaStrategy.strategy.LivermoreHourStrategy import LivermoreHourStrategy
-    from vnpy.trader.app.ctaStrategy.strategy.LivermoreThirtyStrategy import LivermoreThirtyStrategy
+
+    from strategy.strategyLivermore5 import *
+
     # 创建回测引擎
     engine = BacktestingEngine()
     
@@ -26,16 +24,25 @@ if __name__ == '__main__':
     #engine.setStartDate('20140101')
     engine.setStartDate('20110101')
     
+    '''
     # 设置产品相关参数
     engine.setSlippage(0.2)     # 股指1跳
     engine.setRate(0.3/10000)   # 万0.3
     engine.setSize(300)         # 股指合约大小 
     engine.setPriceTick(0.2)    # 股指最小价格变动
-    
+    '''
+
+    engine.setSlippage(1.0)      
+    engine.setRate(1.29/10000)    # 万0.3
+
+    engine.setSize(10)          # 股指合约大小  , 一跳
+    engine.setPriceTick(1.0)    # 股指最小价格变动
+
+
     # 设置使用的历史数据库
     #engine.setDatabase(MINUTE_DB_NAME, 'rb888')
     #engine.setDatabase(HOUR_DB_NAME, 'rb888')
-    engine.setDatabase(THIRTY_MINUTE_DB_NAME, 'rb888')
+    engine.setDatabase(MINUTE_DB_NAME, 'rb888')
     
     # 跑优化
     # setting = OptimizationSetting()                 # 新建一个优化任务设置对象
@@ -46,8 +53,11 @@ if __name__ == '__main__':
     
     setting = OptimizationSetting() 
     setting.setOptimizeTarget('capital')              # 设置优化排序的目标是策略净盈利
-    setting.addParameter('param1',  10  , 200 , 5)      # 增加第一个优化参数atrLength，起始12，结束20，步进2
-    setting.addParameter('param2',  10 , 120,  5)          
+    setting.addParameter('param1',  30 )              # 
+    setting.addParameter('param2',  10 )
+    setting.addParameter('minute_use',  30 )
+    setting.addParameter('kai_down',  40 , 40 , 4)
+    setting.addParameter('wg_size', 5 , 30 , 5)   
     
     #setting = OptimizationSetting()
 
@@ -60,8 +70,9 @@ if __name__ == '__main__':
     #engine.runOptimization(AtrRsiStrategy, setting)            
     #engine.runOptimization(LivermoreStrategy2, setting)
     #engine.runOptimization(LivermoreHourStrategy, setting)
-    engine.runOptimization(LivermoreThirtyStrategy, setting)
-    
+    #engine.runOptimization(LivermoreThirtyStrategy, setting)
+    engine.runOptimization(Livermore_5_Strategy, setting)
+
     # 多进程优化，耗时：89秒
     #engine.runParallelOptimization(AtrRsiStrategy, setting)
     #engine.runParallelOptimization(LivermoreStrategy, setting)

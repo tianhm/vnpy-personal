@@ -1,0 +1,6 @@
+{'kai_down': 40, 'wg_size': 5, 'minute_use': 30, 'param2': 10, 'param1': 30}_capital_1137.76645
+{'kai_down': 40, 'wg_size': 10, 'minute_use': 30, 'param2': 10, 'param1': 30}_capital_1137.76645
+{'kai_down': 40, 'wg_size': 15, 'minute_use': 30, 'param2': 10, 'param1': 30}_capital_1137.76645
+{'kai_down': 40, 'wg_size': 20, 'minute_use': 30, 'param2': 10, 'param1': 30}_capital_1137.76645
+{'kai_down': 40, 'wg_size': 25, 'minute_use': 30, 'param2': 10, 'param1': 30}_capital_1137.76645
+{'kai_down': 40, 'wg_size': 30, 'minute_use': 30, 'param2': 10, 'param1': 30}_capital_1137.76645

@@ -12,7 +12,6 @@ from .stBase import (EVENT_SPREADTRADING_TICK, EVENT_SPREADTRADING_POS,
                      EVENT_SPREADTRADING_ALGOLOG)
 from .stAlgo import StAlgoTemplate
 
-from PyQt4 import QtCore, QtGui
 
 STYLESHEET_START = 'background-color: rgb(111,255,244); color: black'
 STYLESHEET_STOP = 'background-color: rgb(255,201,111); color: black'
@@ -34,7 +33,7 @@ class StTickMonitor(BasicMonitor):
         d['askPrice'] = {'chinese':u'卖价', 'cellType':AskCell}
         d['askVolume'] = {'chinese':u'卖量', 'cellType':AskCell}
         d['time'] = {'chinese':u'时间', 'cellType':BasicCell}
-        d['symbol'] = {'chinese':u'代码', 'cellType':BasicCell}
+        d['symbol'] = {'chinese':u'价差公式', 'cellType':BasicCell}
         self.setHeaderDict(d)
     
         self.setDataKey('name')
